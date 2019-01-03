@@ -1,2 +1,2 @@
-# vendor-oc-hydroraindrop-plugin
+# oc-hydroraindrop-plugin
 Repo for Raindrop MFA Plugin for OctoberCMS
