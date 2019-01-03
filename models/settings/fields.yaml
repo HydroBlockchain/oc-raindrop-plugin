@@ -1,0 +1,63 @@
+# ===================================
+#  Field Definitions
+# ===================================
+
+tabs:
+    fields:
+        #
+        # API Settings
+        #
+        application_id:
+            tab: "API Settings"
+            label: "Application ID"
+            comment: "Register an account at <a href=\"https://www.hydrogenplatform.com\">https://www.hydrogenplatform.com</a> to obtain an Application ID."
+            commentHtml: true
+            type: text
+            span: left
+
+        client_id:
+            tab: "API Settings"
+            label: "Client ID"
+            type: text
+            span: left
+
+        client_secret:
+            tab: "API Settings"
+            label: "Client Secret"
+            type: text
+            span: left
+
+        environment:
+            tab: "API Settings"
+            label: "Environment"
+            type: dropdown
+            span: left
+            options:
+                production: Production
+                sandbox: Sandbox
+
+        #
+        # Customization
+        #
+        mfa_section:
+            label: "Multi Factor Authentication"
+            tab: "Customization"
+            span: left
+            type: section
+        mfa_method:
+            label: "Method"
+            tab: "Customization"
+            span: left
+            type: radio
+            required: true
+            default: prompted
+            options:
+                optional: [Optional, User decides to enable MFA on their account.]
+                prompted: [Prompted, MFA setup screen will be prompted after logging in. User can skip this step and setup MFA later.]
+                enforced: [Enforced, MFA is forced site wide. Users will have to setup MFA after logging in.]
+        mfa_maximum_attempts:
+            label: "Maximum attempts (0 = unlimited)"
+            tab: "Customization"
+            span: left
+            type: number
+            comment: "The user account will be blocked if the number of attempts exceeds this value."

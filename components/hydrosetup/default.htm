@@ -1,0 +1,62 @@
+{% spaceless %}
+<div id="hydro-container" class="hydro-setup">
+    <form method="post"
+          data-request="{{ __SELF__ ~ '::onSubmit' }}"
+          data-request-validate
+          data-request-flash>
+        <div class="hydro-header">
+            <div class="logo">
+                <a href="/">
+                    <img src="{{ app_logo }}" alt="{{ app_name }} - {{ app_tagline }}">
+                </a>
+            </div>
+            <h1>{{ 'Hydro MFA'|_ }}</h1>
+        </div>
+        <div class="hydro-body">
+            <div class="item full">
+                <img src="/plugins/hydrocommunity/raindrop/assets/images/input-hydro-id.png"
+                     class="hydro-illustration"
+                     alt="{{ 'Enter your HydroID' }}">
+                <input type="text"
+                       name="hydro_id"
+                       placeholder="{{ 'Enter HydroID'|_ }}"
+                       class="hydro-setup-hydro-id"
+                       title="{{ 'HydroID'|_ }}"
+                       autocomplete="off"
+                       autofocus
+                       data-attach-loading>
+                <div class="validation-message" data-validate-for="hydro_id"></div>
+                <div class="notice info">
+                    <h3>Steps for getting a HydroID</h3>
+                    <span>Download Free Hydro Mobile App
+                        <a href="https://itunes.apple.com/app/id1406519814">iOS</a>/<a
+                            href="https://play.google.com/store/apps/details?id=com.hydrogenplatform.hydro">Android</a>
+                    </span>
+                    <span>Setup Mobile App and enter HydroID to continue.</span>
+                </div>
+            </div>
+            <div class="item actions">
+                {%- if __SELF__.skipAllowed -%}
+                    <a href="javascript:;" class="hydro-setup-button-skip" data-request="{{ __SELF__ ~ '::onSkip' }}">
+                        {{- 'Skip'|_ -}}
+                    </a>
+                {%- endif -%}
+            </div>
+        </div>
+        <div class="hydro-footer">
+            <div class="hydro-submission">
+                <input type="submit"
+                       class="primary"
+                       value="{{ 'Submit'|_ }}"
+                       data-attach-loading>
+            </div>
+            <div class="hydro-abt-us">
+                <a href="https://www.hydrogenplatform.com/" target="_blank" title="{{ 'This website is powered by Hydro - Blockchain based multi factor authentication, visit us to know more'|_ }}">
+                    <label>{{ 'Powered by'|_ }}</label>
+                    <img src="https://www.hydrogenplatform.com/images/logo_hydro.svg" alt="Hydro">
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endspaceless %}

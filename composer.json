@@ -1,0 +1,11 @@
+{
+    "name": "hydrocommunity/oc-raindrop-plugin",
+    "type": "october-plugin",
+    "description": "Integrates Hydro Raindrop MFA to OctoberCMS.",
+    "keywords": ["october", "cms", "hydro", "raindrop", "mfa"],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0",
+        "adrenth/raindrop-sdk": "^1.2"
+    }
+}
