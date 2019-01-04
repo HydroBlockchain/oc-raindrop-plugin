@@ -23,7 +23,7 @@ class MfaUser
     /**
      * @var MfaSession
      */
-    private $sessionHelper;
+    private $mfaSession;
 
     /**
      * @param User $userModel
@@ -31,7 +31,7 @@ class MfaUser
     public function __construct(User $userModel)
     {
         $this->userModel = $userModel;
-        $this->sessionHelper = new MfaSession();
+        $this->mfaSession = new MfaSession();
     }
 
     /**
@@ -82,7 +82,7 @@ class MfaUser
 
         return !empty($hydroId)
             && $mfaEnabled
-            && ($mfaConfirmed || $this->sessionHelper->isActionVerify());
+            && ($mfaConfirmed || $this->mfaSession->isActionVerify() || $this->mfaSession->isActionDisable());
     }
 
     /**
@@ -90,8 +90,12 @@ class MfaUser
      */
     public function requiresMfaSetup(): bool
     {
-        if ($this->sessionHelper->isActionEnable()) {
+        if ($this->mfaSession->isActionEnable()) {
             return true;
+        }
+
+        if ($this->mfaSession->isActionDisable()) {
+            return false;
         }
 
         $method = Models\Settings::get('mfa_method', Models\Settings::MFA_METHOD_PROMPTED);

@@ -44,6 +44,7 @@ class SignOn extends BaseMiddleware
                 'password' => $request->request->get('password'),
             ]);
         } catch (Throwable $e) {
+            $this->log->warning('Hydro Raindrop: User could not with given credentials.');
             return $next($request);
         }
 

@@ -111,7 +111,6 @@ class Plugin extends PluginBase
             /** @var \October\Rain\Foundation\Http\Kernel $kernel */
             $kernel = resolve(Kernel::class);
             $kernel->prependMiddleware(Middleware\Mfa::class)
-                ->prependMiddleware(Middleware\MfaSetup::class)
                 ->prependMiddleware(Middleware\SignOn::class)
                 ->prependMiddleware(StartSession::class); // Make sure the session is available.
         }

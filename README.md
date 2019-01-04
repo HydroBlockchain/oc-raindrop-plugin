@@ -84,10 +84,6 @@ layout = "default"
 is_hidden = 0
 
 [hydroCommunityHydroMfa]
-
-[session]
-redirect = "login"
-security = "guest"
 ==
 {% component 'hydroCommunityHydroMfa' %}
 ```
@@ -100,10 +96,6 @@ layout = "default"
 is_hidden = 0
 
 [hydroCommunityHydroSetup]
-
-[session]
-redirect = "login"
-security = "guest"
 ==
 {% component 'hydroCommunityHydroSetup' %}
 ```

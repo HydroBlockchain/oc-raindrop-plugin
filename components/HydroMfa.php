@@ -176,7 +176,8 @@ class HydroMfa extends HydroComponentBase
             $hydroId = $this->userHelper->getHydroId();
 
             try {
-                $this->client->unregisterUser($hydroId);
+                // TODO: Enable when Hydro BETA app is available.
+                // $this->client->unregisterUser($hydroId);
 
                 $user->meta()->update([
                     'hydro_id' => null,

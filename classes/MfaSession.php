@@ -18,10 +18,10 @@ use RainLab\User\Models\User;
  */
 final class MfaSession
 {
-    private const SESSION_KEY_USER = 'HydroCommunity.Raindrop.User';
-    private const SESSION_KEY_ACTION = 'HydroCommunity.Raindrop.Action';
-    private const SESSION_KEY_MESSAGE = 'HydroCommunity.Raindrop.Message';
-    private const SESSION_KEY_TIME = 'HydroCommunity.Raindrop.Time';
+    private const SESSION_KEY_USER = 'hydro_community_raindrop_user';
+    private const SESSION_KEY_ACTION = 'hydro_community_raindrop_action';
+    private const SESSION_KEY_MESSAGE = 'hydro_community_raindrop_message';
+    private const SESSION_KEY_TIME = 'hydro_community_raindrop_time';
 
     public const ACTION_ENABLE = 'enable';
     public const ACTION_VERIFY = 'verify';
@@ -32,7 +32,7 @@ final class MfaSession
      *
      * @var int
      */
-    private const SESSION_LIFETIME = 10;
+    private const SESSION_LIFETIME = 90;
 
     /**
      * @var Store
