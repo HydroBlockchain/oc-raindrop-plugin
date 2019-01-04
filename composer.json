@@ -1,7 +1,7 @@
 {
     "name": "hydrocommunity/oc-raindrop-plugin",
     "type": "october-plugin",
-    "description": "Integrates Hydro Raindrop MFA to OctoberCMS.",
+    "description": "Integrates Hydro Raindrop MFA to October CMS.",
     "keywords": ["october", "cms", "hydro", "raindrop", "mfa"],
     "license": "MIT",
     "require": {

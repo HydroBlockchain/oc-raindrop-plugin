@@ -6,6 +6,7 @@ namespace HydroCommunity\Raindrop\Classes\Middleware;
 
 use Closure;
 use HydroCommunity\Raindrop\Classes\MfaUser;
+use HydroCommunity\Raindrop\Classes\UrlHelper;
 use Illuminate\Http\Request;
 use October\Rain\Auth\AuthException;
 use RainLab\User\Classes\AuthManager;
@@ -44,7 +45,7 @@ class SignOn extends BaseMiddleware
                 'password' => $request->request->get('password'),
             ]);
         } catch (Throwable $e) {
-            $this->log->warning('Hydro Raindrop: User could not with given credentials.');
+            $this->log->warning('Hydro Raindrop: User could not be found with given credentials.');
             return $next($request);
         }
 
@@ -65,7 +66,7 @@ class SignOn extends BaseMiddleware
          */
         if ($userHelper->requiresMfaSetup()) {
             $this->log->info('User authenticates and requires Hydro Raindrop MFA Setup.');
-            $redirectUri = '/hydro-raindrop/setup';
+            $redirectUri = UrlHelper::URL_SETUP;
         }
 
         /*
@@ -73,7 +74,7 @@ class SignOn extends BaseMiddleware
          */
         if ($userHelper->requiresMfa()) {
             $this->log->info('User authenticates and requires Hydro Raindrop MFA.');
-            $redirectUri = '/hydro-raindrop/mfa';
+            $redirectUri = UrlHelper::URL_MFA;
         }
 
         return response()->json([
@@ -90,7 +91,7 @@ class SignOn extends BaseMiddleware
         return $request->ajax()
             && $request->hasHeader('X-OCTOBER-REQUEST-HANDLER')
             && $request->header('X-OCTOBER-REQUEST-HANDLER') === 'onSignin'
-            && $request->request->has('login')
-            && $request->request->has('password');
+            && $request->has('login')
+            && $request->has('password');
     }
 }

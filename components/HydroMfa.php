@@ -10,6 +10,7 @@ use HydroCommunity\Raindrop\Classes\Exceptions\InvalidUserInSession;
 use HydroCommunity\Raindrop\Classes\Exceptions\MessageNotFoundInSessionStorage;
 use HydroCommunity\Raindrop\Classes\Exceptions\UserIdNotFoundInSessionStorage;
 use HydroCommunity\Raindrop\Classes\MfaUser;
+use HydroCommunity\Raindrop\Classes\UrlHelper;
 use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\RedirectResponse;
 use RainLab\User\Classes\AuthManager;
@@ -53,7 +54,7 @@ class HydroMfa extends HydroComponentBase
             $this->prepareVars();
         } catch (UserIdNotFoundInSessionStorage | InvalidUserInSession $e) {
             $this->log->error($e);
-            return redirect()->to('/');
+            return (new UrlHelper())->getSignOnResponse();
         }
 
         $this->addCss('assets/css/hydro-raindrop.css');
@@ -85,7 +86,7 @@ class HydroMfa extends HydroComponentBase
             $this->prepareVars();
         } catch (UserIdNotFoundInSessionStorage | InvalidUserInSession $e) {
             $this->log->error($e);
-            return redirect()->to('/');
+            return (new UrlHelper())->getSignOnResponse();
         }
 
         $signatureVerified = $this->verifySignatureLogin();
@@ -107,12 +108,11 @@ class HydroMfa extends HydroComponentBase
             $this->prepareVars();
         } catch (UserIdNotFoundInSessionStorage | InvalidUserInSession $e) {
             $this->log->error($e);
-            $this->urlHelper->getSignOnResponse();
         }
 
         $this->mfaSession->destroy();
 
-        return $this->urlHelper->getSignOnResponse();
+        return (new UrlHelper())->getSignOnResponse();
     }
 
     /**

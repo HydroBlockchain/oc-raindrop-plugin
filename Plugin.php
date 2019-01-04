@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop;
 
-use Backend\Classes\Controller;
 use Backend\Widgets\Form;
 use HydroCommunity\Raindrop\Classes\Middleware;
 use HydroCommunity\Raindrop\Classes\RequirementChecker;

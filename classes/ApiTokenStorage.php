@@ -16,7 +16,7 @@ use Illuminate\Cache\Repository;
  */
 class ApiTokenStorage implements TokenStorage
 {
-    const CACHE_KEY = 'HydroCommunity.Raindrop.Token';
+    private const CACHE_KEY = 'hydro_community_raindrop_token';
 
     /**
      * @var Repository

@@ -16,8 +16,8 @@ use Illuminate\Http\RedirectResponse;
  */
 class UrlHelper
 {
-    private const URL_SETUP = '/hydro-raindrop/setup';
-    private const URL_MFA = '/hydro-raindrop/mfa';
+    public const URL_SETUP = '/hydro-raindrop/setup';
+    public const URL_MFA = '/hydro-raindrop/mfa';
 
     /**
      * @var Cms
