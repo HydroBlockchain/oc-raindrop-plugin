@@ -18,8 +18,8 @@
                          class="hydro-illustration"
                          alt="{{ 'Enter Code in the Hydro App'|_ }}">
                     <label>{{ 'Enter Security Code into the Hydro App'|_ }}</label>
-                    <div class="hydro-digits">
-                        {{- __SELF__.message -}}
+                    <div class="hydro-digits" id="hydroDigits">
+                        {% partial __SELF__ ~ '::_message' %}
                     </div>
                     <div class="validation-message" data-validate-for="hydro-digits"></div>
                 </div>
@@ -34,7 +34,7 @@
             <div class="hydro-footer">
                 <div class="hydro-submission">
                     <input type="submit"
-                           class="primary"
+                           class="btn primary"
                            value="{{ 'Authenticate'|_ }}"
                            data-attach-loading>
                 </div>

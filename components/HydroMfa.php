@@ -77,10 +77,10 @@ class HydroMfa extends HydroComponentBase
     }
 
     /**
-     * @return RedirectResponse
+     * @return RedirectResponse|array
      * @throws \Exception
      */
-    public function onAuthenticate(): ?RedirectResponse
+    public function onAuthenticate()
     {
         try {
             $this->prepareVars();
@@ -130,14 +130,10 @@ class HydroMfa extends HydroComponentBase
         }
 
         try {
-            // TODO: Wait for the Hydro BETA app.
-            //throw VerifySignatureFailed::withHydroId($this->userHelper->getHydroId(), (string) $message);
-            /*
             $this->client->verifySignature(
                 $this->userHelper->getHydroId(),
                 $message
             );
-            */
 
             $this->mfaSession->forgetMessage();
 
@@ -145,8 +141,6 @@ class HydroMfa extends HydroComponentBase
                 $user->meta()->update([
                     'is_mfa_confirmed' => true,
                 ]);
-
-                // TODO: Trigger event.
             }
 
             return true;
@@ -176,8 +170,7 @@ class HydroMfa extends HydroComponentBase
             $hydroId = $this->userHelper->getHydroId();
 
             try {
-                // TODO: Enable when Hydro BETA app is available.
-                // $this->client->unregisterUser($hydroId);
+                $this->client->unregisterUser($hydroId);
 
                 $user->meta()->update([
                     'hydro_id' => null,
@@ -197,11 +190,13 @@ class HydroMfa extends HydroComponentBase
     }
 
     /**
-     * @return RedirectResponse|null
+     * @return RedirectResponse|array
+     * @throws InvalidUserInSession
+     * @throws UserIdNotFoundInSessionStorage
      */
-    private function handleMfaFailure(): ?RedirectResponse
+    private function handleMfaFailure()
     {
-        $this->flash->error(trans('Authentication failed.'));
+        $this->flash->error(trans('Authentication failed, please try again.'));
         $this->mfaSession->forgetMessage();
 
         $user = $this->userHelper->getUserModel();
@@ -211,8 +206,6 @@ class HydroMfa extends HydroComponentBase
         $user->meta()->update([
             'mfa_failed_attempts' => ++$failedAttempts,
         ]);
-
-        // TODO: Trigger event.
 
         $maximumAttempts = (int) Settings::get('mfa_maximum_attempts', 0);
 
@@ -226,11 +219,13 @@ class HydroMfa extends HydroComponentBase
 
             $this->mfaSession->destroy();
 
-            // TODO: Trigger event.
-
             return redirect()->to('/');
         }
 
-        return null;
+        $this->prepareVars();
+
+        return [
+            '#hydroDigits' => $this->renderPartial($this->alias . '::_message')
+        ];
     }
 }

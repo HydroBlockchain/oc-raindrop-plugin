@@ -168,8 +168,7 @@ class HydroSetup extends HydroComponentBase
         $user = $this->userHelper->getUserModel();
 
         try {
-            // TODO: Waiting for Hydro app to work.
-            // $this->client->registerUser($hydroId);
+            $this->client->registerUser($hydroId);
         } catch (UserAlreadyMappedToApplication $e) {
             /*
              * User is already mapped to this application.
