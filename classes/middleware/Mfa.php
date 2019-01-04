@@ -10,7 +10,6 @@ use HydroCommunity\Raindrop\Classes\MfaSession;
 use HydroCommunity\Raindrop\Classes\UrlHelper;
 use HydroCommunity\Raindrop\Classes\MfaUser;
 use HydroCommunity\Raindrop\Models\Settings;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use RainLab\User\Classes\AuthManager;
 use RainLab\User\Models\User;

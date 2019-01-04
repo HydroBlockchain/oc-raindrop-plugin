@@ -15,7 +15,7 @@ use October\Rain\Support\Facades\Schema;
  */
 class CreateUsersMetaTable extends Migration
 {
-
+    /** @noinspection ReturnTypeCanBeDeclaredInspection */
     public function up()
     {
         Schema::create('hydrocommunity_raindrop_users_meta', function (Blueprint $table) {
@@ -31,6 +31,7 @@ class CreateUsersMetaTable extends Migration
         });
     }
 
+    /** @noinspection ReturnTypeCanBeDeclaredInspection */
     public function down()
     {
         Schema::dropIfExists('hydrocommunity_raindrop_users_meta');

@@ -16,11 +16,11 @@ use System\Behaviors\SettingsModel;
  */
 class Settings extends Model
 {
-    public const MFA_METHOD_OPTIONAL = 'optional';
-    public const MFA_METHOD_PROMPTED = 'prompted';
-    public const MFA_METHOD_ENFORCED = 'enforced';
+    const /** @noinspection AccessModifierPresentedInspection */ MFA_METHOD_OPTIONAL = 'optional';
+    const /** @noinspection AccessModifierPresentedInspection */ MFA_METHOD_PROMPTED = 'prompted';
+    const /** @noinspection AccessModifierPresentedInspection */ MFA_METHOD_ENFORCED = 'enforced';
 
-    public const MFA_TIMEOUT = 90;
+    const /** @noinspection AccessModifierPresentedInspection */ MFA_TIMEOUT = 90;
 
     public $implement = [SettingsModel::class];
 

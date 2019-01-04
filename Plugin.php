@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop;
 
+use Backend\Classes\Controller;
 use Backend\Widgets\Form;
 use HydroCommunity\Raindrop\Classes\Middleware;
+use HydroCommunity\Raindrop\Classes\RequirementChecker;
 use HydroCommunity\Raindrop\Components\HydroMfa;
 use HydroCommunity\Raindrop\Components\HydroSetup;
 use HydroCommunity\Raindrop\Models\Settings;
@@ -35,9 +37,8 @@ class Plugin extends PluginBase
         'Rainlab.Translate',
     ];
 
-    /**
-     * {@inheritdoc}
-     */
+    /** @noinspection PhpMissingParentCallCommonInspection */
+    /** @noinspection PhpMissingDocCommentInspection */
     public function pluginDetails(): array
     {
         return [
@@ -48,23 +49,18 @@ class Plugin extends PluginBase
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    /** @noinspection PhpMissingParentCallCommonInspection */
+    /** @noinspection PhpMissingDocCommentInspection */
     public function registerComponents(): array
     {
-        return array_merge(
-            (array) parent::registerComponents(),
-            [
-                HydroMfa::class => 'hydroCommunityHydroMfa',
-                HydroSetup::class => 'hydroCommunityHydroSetup',
-            ]
-        );
+        return [
+            HydroMfa::class => 'hydroCommunityHydroMfa',
+            HydroSetup::class => 'hydroCommunityHydroSetup',
+        ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    /** @noinspection PhpMissingParentCallCommonInspection */
+    /** @noinspection PhpMissingDocCommentInspection */
     public function registerPermissions(): array
     {
         return [
@@ -75,9 +71,8 @@ class Plugin extends PluginBase
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    /** @noinspection PhpMissingParentCallCommonInspection */
+    /** @noinspection PhpMissingDocCommentInspection */
     public function registerSettings(): array
     {
         return [
@@ -93,12 +88,14 @@ class Plugin extends PluginBase
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    /** @noinspection PhpMissingParentCallCommonInspection */
+    /** @noinspection PhpMissingDocCommentInspection */
     public function boot()
     {
-        parent::boot();
+        // Do not boot the plugin when PHP version is too low.
+        if (version_compare(PHP_VERSION, '7.1.0') <= 0) {
+            return;
+        }
 
         /** @var Application $application */
         $application = resolve(Application::class);
@@ -132,22 +129,35 @@ class Plugin extends PluginBase
         });
 
         Event::listen('backend.form.extendFields', function (Form $form) {
-            if (!($form->model instanceof User) || !($form->getController() instanceof Users)) {
-                return;
+            if ($form->model instanceof User || $form->getController() instanceof Users) {
+                $form->addFields([
+                    'meta[is_blocked]' => [
+                        'tab' => 'rainlab.user::lang.user.account',
+                        'type' => 'switch',
+                        'label' => 'Blocked',
+                    ],
+                ]);
             }
-            $form->addFields([
-                'meta[is_mfa_enabled]' => [
-                    'tab' => 'rainlab.user::lang.user.account',
-                    'type' => 'switch',
-                    'label' => 'Enable Multi Factor Authentication',
-                ],
-            ]);
+
+            if ($form->model instanceof Settings) {
+                $requirementChecker = new RequirementChecker();
+
+                if (!$requirementChecker->passes()) {
+                    $form->removeTab('General');
+                    $form->removeTab('API Settings');
+                    $form->removeTab('Customization');
+                }
+            }
         });
     }
 
-    public function register(): void
+    /** @noinspection ReturnTypeCanBeDeclaredInspection */
+    /** @noinspection PhpMissingParentCallCommonInspection */
+    public function register()
     {
-        parent::register();
+        if (version_compare(PHP_VERSION, '7.1.0') <= 0) {
+            return;
+        }
 
         $this->app->register(HydroRaindrop::class);
     }

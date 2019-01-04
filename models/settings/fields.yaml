@@ -2,21 +2,34 @@
 #  Field Definitions
 # ===================================
 
+fields:
+    logo:
+        type: partial
+        path: ~/plugins/hydrocommunity/raindrop/models/settings/_logo.htm
+
 tabs:
     fields:
+        #
+        # Requirements
+        #
+        requirements:
+            tab: "Requirements"
+            type: partial
+            path: ~/plugins/hydrocommunity/raindrop/models/settings/_requirements.htm
+
         #
         # General
         #
         page_sign_on:
             tab: "General"
-            label: "Login page"
-            comment: "Select the page which contains the login form."
+            label: "Login Page"
+            comment: "The login page of your website which contains the login form."
             type: dropdown
             span: left
         page_redirect:
             tab: "General"
             label: "Redirect to"
-            comment: "Page to redirect to after successful sign in and MFA."
+            comment: "Page to redirect to after sign in."
             type: dropdown
             span: left
 

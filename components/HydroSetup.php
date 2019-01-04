@@ -11,6 +11,7 @@ use HydroCommunity\Raindrop\Classes\Exceptions\InvalidUserInSession;
 use HydroCommunity\Raindrop\Classes\Exceptions\UserIdNotFoundInSessionStorage;
 use HydroCommunity\Raindrop\Classes\MfaSession;
 use HydroCommunity\Raindrop\Classes\MfaUser;
+use HydroCommunity\Raindrop\Classes\UrlHelper;
 use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -60,7 +61,7 @@ class HydroSetup extends HydroComponentBase
             $this->prepareVars();
         } catch (UserIdNotFoundInSessionStorage | InvalidUserInSession $e) {
             $this->log->error($e);
-            return redirect()->to('/');
+            return (new UrlHelper())->getSignOnResponse();
         }
 
         $this->addCss('assets/css/hydro-raindrop.css');
@@ -80,7 +81,7 @@ class HydroSetup extends HydroComponentBase
      * @throws ValidationException
      * @throws InvalidArgumentException
      */
-    public function onSubmit()
+    public function onSubmit(): RedirectResponse
     {
         $this->validateSubmitRequest();
 
@@ -88,28 +89,28 @@ class HydroSetup extends HydroComponentBase
             $this->prepareVars();
         } catch (UserIdNotFoundInSessionStorage | InvalidUserInSession $e) {
             $this->log->error($e);
-            return redirect('/');
+            return (new UrlHelper())->getSignOnResponse();
         }
 
         return $this->registerUser((string) $this->request->get('hydro_id'));
     }
 
     /**
-     * @return RedirectResponse|\Illuminate\Routing\Redirector
+     * @return RedirectResponse
      * @throws \October\Rain\Auth\AuthException
      */
-    public function onSkip()
+    public function onSkip(): RedirectResponse
     {
         try {
             $this->prepareVars();
         } catch (UserIdNotFoundInSessionStorage | InvalidUserInSession $e) {
             $this->log->error($e);
-            return redirect('/');
+            return (new UrlHelper())->getSignOnResponse();
         }
 
         $user = $this->userHelper->getUserModel();
 
-        $this->mfaSession->forgetUserId();
+        $this->mfaSession->destroy();
 
         $mfaMethod = Settings::get('mfa_method');
 
@@ -117,10 +118,10 @@ class HydroSetup extends HydroComponentBase
             || $mfaMethod === Settings::MFA_METHOD_PROMPTED
         ) {
             AuthManager::instance()->login($user, false);
+            return (new UrlHelper())->getRedirectResponse();
         }
 
-        // TODO: Redirect to the correct URL.
-        return redirect()->to('/');
+        return (new UrlHelper())->getSignOnResponse();
     }
 
     /**
