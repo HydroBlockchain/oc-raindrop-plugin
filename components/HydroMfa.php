@@ -9,7 +9,7 @@ use Adrenth\Raindrop\Exception\VerifySignatureFailed;
 use HydroCommunity\Raindrop\Classes\Exceptions\InvalidUserInSession;
 use HydroCommunity\Raindrop\Classes\Exceptions\MessageNotFoundInSessionStorage;
 use HydroCommunity\Raindrop\Classes\Exceptions\UserIdNotFoundInSessionStorage;
-use HydroCommunity\Raindrop\Classes\UserHelper;
+use HydroCommunity\Raindrop\Classes\MfaUser;
 use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\RedirectResponse;
 use RainLab\User\Classes\AuthManager;
@@ -22,7 +22,7 @@ use RainLab\User\Classes\AuthManager;
 class HydroMfa extends HydroComponentBase
 {
     /**
-     * @var UserHelper
+     * @var MfaUser
      */
     private $userHelper;
 
@@ -66,13 +66,13 @@ class HydroMfa extends HydroComponentBase
      */
     protected function prepareVars(): void
     {
-        $this->userHelper = UserHelper::createFromSession();
+        $this->userHelper = MfaUser::createFromSession();
 
-        if (!$this->sessionHelper->hasMessage()) {
-            $this->sessionHelper->setMessage($this->client->generateMessage());
+        if (!$this->mfaSession->hasMessage()) {
+            $this->mfaSession->setMessage($this->client->generateMessage());
         }
 
-        $this->message = $this->sessionHelper->getMessage();
+        $this->message = $this->mfaSession->getMessage();
     }
 
     /**
@@ -107,12 +107,12 @@ class HydroMfa extends HydroComponentBase
             $this->prepareVars();
         } catch (UserIdNotFoundInSessionStorage | InvalidUserInSession $e) {
             $this->log->error($e);
-            return redirect()->to('/');
+            $this->urlHelper->getSignOnResponse();
         }
 
-        $this->sessionHelper->forgetUserId();
+        $this->mfaSession->destroy();
 
-        return redirect()->to('/');
+        return $this->urlHelper->getSignOnResponse();
     }
 
     /**
@@ -120,10 +120,10 @@ class HydroMfa extends HydroComponentBase
      */
     private function verifySignatureLogin(): bool
     {
-        $user = $this->userHelper->getUser();
+        $user = $this->userHelper->getUserModel();
 
         try {
-            $message = $this->sessionHelper->getMessage();
+            $message = $this->mfaSession->getMessage();
         } catch (MessageNotFoundInSessionStorage $e) {
             $this->log->error('Hydro Raindrop: ' . $e->getMessage());
             return false;
@@ -139,9 +139,9 @@ class HydroMfa extends HydroComponentBase
             );
             */
 
-            $this->sessionHelper->forgetMessage();
+            $this->mfaSession->forgetMessage();
 
-            if ($this->sessionHelper->isActionVerify()) {
+            if ($this->mfaSession->isActionVerify()) {
                 $user->meta()->update([
                     'is_mfa_confirmed' => true,
                 ]);
@@ -164,14 +164,14 @@ class HydroMfa extends HydroComponentBase
     {
         $authManager = AuthManager::instance();
 
-        $user = $this->userHelper->getUser();
+        $user = $this->userHelper->getUserModel();
 
         if (!$authManager->check()) {
             $authManager->login($user, false);
         }
 
         if (Settings::get('mfa_method') !== Settings::MFA_METHOD_ENFORCED
-            && $this->sessionHelper->isActionDisable()
+            && $this->mfaSession->isActionDisable()
         ) {
             $hydroId = $this->userHelper->getHydroId();
 
@@ -190,10 +190,9 @@ class HydroMfa extends HydroComponentBase
             }
         }
 
-        $this->sessionHelper->forgetAll();
+        $this->mfaSession->destroy();
 
-        // TODO: Redirect to the after login url.
-        return redirect()->to('/');
+        return $this->urlHelper->getRedirectResponse();
     }
 
     /**
@@ -202,9 +201,9 @@ class HydroMfa extends HydroComponentBase
     private function handleMfaFailure(): ?RedirectResponse
     {
         $this->flash->error(trans('Authentication failed.'));
-        $this->sessionHelper->forgetMessage();
+        $this->mfaSession->forgetMessage();
 
-        $user = $this->userHelper->getUser();
+        $user = $this->userHelper->getUserModel();
 
         $failedAttempts = $user->meta->getAttribute('mfa_failed_attempts');
 
@@ -224,7 +223,7 @@ class HydroMfa extends HydroComponentBase
 
             $this->flash->error(trans('Your account has been blocked.'));
 
-            $this->sessionHelper->forgetAll();
+            $this->mfaSession->destroy();
 
             // TODO: Trigger event.
 

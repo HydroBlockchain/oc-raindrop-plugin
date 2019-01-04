@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop\Classes\Middleware;
 
-use HydroCommunity\Raindrop\Classes\SessionHelper;
+use HydroCommunity\Raindrop\Classes\MfaSession;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,9 +22,9 @@ abstract class BaseMiddleware
     protected $log;
 
     /**
-     * @var SessionHelper
+     * @var MfaSession
      */
-    protected $sessionHelper;
+    protected $mfaSession;
 
     /**
      * @param LoggerInterface $log
@@ -32,6 +32,6 @@ abstract class BaseMiddleware
     public function __construct(LoggerInterface $log)
     {
         $this->log = $log;
-        $this->sessionHelper = new SessionHelper();
+        $this->mfaSession = new MfaSession();
     }
 }

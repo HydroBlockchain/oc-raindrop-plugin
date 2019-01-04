@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace HydroCommunity\Raindrop\Classes\Middleware;
 
 use Closure;
-use HydroCommunity\Raindrop\Classes\UserHelper;
+use HydroCommunity\Raindrop\Classes\MfaUser;
 use Illuminate\Http\Request;
 use October\Rain\Auth\AuthException;
-use October\Rain\Flash\FlashBag;
 use RainLab\User\Classes\AuthManager;
 use RainLab\User\Models\User;
 use Throwable;
@@ -50,14 +49,15 @@ class SignOn extends BaseMiddleware
 
         $redirectUri = null;
 
-        $userHelper = new UserHelper($user);
+        $userHelper = new MfaUser($user);
 
         if ($userHelper->isBlocked()) {
             throw new AuthException(trans('Your account has been blocked.'));
         }
 
-        $this->sessionHelper->setUserId($user->getKey());
-        $this->sessionHelper->forgetAction();
+        $this->mfaSession
+            ->start()
+            ->setUserId($user->getKey());
 
         /*
          * Set up of Hydro Raindrop MFA is required.

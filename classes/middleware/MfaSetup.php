@@ -7,7 +7,7 @@ namespace HydroCommunity\Raindrop\Classes\Middleware;
 use Closure;
 use HydroCommunity\Raindrop\Classes\Exceptions;
 use HydroCommunity\Raindrop\Classes\UrlHelper;
-use HydroCommunity\Raindrop\Classes\UserHelper;
+use HydroCommunity\Raindrop\Classes\MfaUser;
 use Illuminate\Http\Request;
 
 /**
@@ -26,17 +26,24 @@ class MfaSetup extends BaseMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!$this->sessionHelper->hasUserId()) {
+        if (!$this->mfaSession->isStarted()) {
             return $next($request);
         }
 
-        $userHelper = UserHelper::createFromSession();
         $urlHelper = new UrlHelper();
+
+        if (!$this->mfaSession->isValid()) {
+            // TODO: Set Flash message ->withErrors
+            $this->mfaSession->destroy();
+            return $urlHelper->getSignOnResponse();
+        }
+
+        $userHelper = MfaUser::createFromSession();
 
         if ($userHelper->requiresMfaSetup()
             && $urlHelper->getSetupUrl() !== $request->url()
         ) {
-            return response()->redirectTo($urlHelper->getSetupUrl());
+            return $urlHelper->getSetupResponse();
         }
 
         return $next($request);

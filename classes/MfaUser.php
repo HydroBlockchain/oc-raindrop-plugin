@@ -9,47 +9,47 @@ use HydroCommunity\Raindrop\Models;
 use RainLab\User\Models\User;
 
 /**
- * Class UserHelper
+ * Class MfaUser
  *
  * @package HydroCommunity\Raindrop\Classes
  */
-class UserHelper
+class MfaUser
 {
     /**
      * @var User
      */
-    private $user;
+    private $userModel;
 
     /**
-     * @var SessionHelper
+     * @var MfaSession
      */
     private $sessionHelper;
 
     /**
-     * @param User $user
+     * @param User $userModel
      */
-    public function __construct(User $user)
+    public function __construct(User $userModel)
     {
-        $this->user = $user;
-        $this->sessionHelper = new SessionHelper();
+        $this->userModel = $userModel;
+        $this->sessionHelper = new MfaSession();
     }
 
     /**
-     * @return UserHelper
+     * @return MfaUser
      * @throws Exceptions\UserIdNotFoundInSessionStorage
      * @throws Exceptions\InvalidUserInSession
      */
     public static function createFromSession(): self
     {
-        return new self((new SessionHelper())->getUser());
+        return new self((new MfaSession())->getUser());
     }
 
     /**
      * @return User
      */
-    public function getUser(): User
+    public function getUserModel(): User
     {
-        return $this->user;
+        return $this->userModel;
     }
 
     /**
@@ -57,7 +57,7 @@ class UserHelper
      */
     public function getHydroId(): string
     {
-        return (string) $this->user->meta->getAttribute('hydro_id');
+        return (string) $this->userModel->meta->getAttribute('hydro_id');
     }
 
     /**
@@ -65,7 +65,7 @@ class UserHelper
      */
     public function isBlocked(): bool
     {
-        return (bool) $this->user->meta->getAttribute('is_blocked');
+        return (bool) $this->userModel->meta->getAttribute('is_blocked');
     }
 
     /**
@@ -74,7 +74,7 @@ class UserHelper
     public function requiresMfa(): bool
     {
         /** @var Models\UserMeta $meta */
-        $meta = $this->user->meta;
+        $meta = $this->userModel->meta;
 
         $hydroId = $meta->getAttribute('hydro_id');
         $mfaEnabled = $meta->getAttribute('is_mfa_enabled');

@@ -55,7 +55,7 @@ class ApiTokenStorage implements TokenStorage
     /**
      * {@inheritdoc}
      */
-    public function setAccessToken(ApiAccessToken $token)
+    public function setAccessToken(ApiAccessToken $token): void
     {
         $this->cache->forever(self::CACHE_KEY, $token);
     }
@@ -63,7 +63,7 @@ class ApiTokenStorage implements TokenStorage
     /**
      * {@inheritdoc}
      */
-    public function unsetAccessToken()
+    public function unsetAccessToken(): void
     {
         $this->cache->forget(self::CACHE_KEY);
     }

@@ -7,7 +7,7 @@ namespace HydroCommunity\Raindrop\Classes\Middleware;
 use Closure;
 use HydroCommunity\Raindrop\Classes\Exceptions;
 use HydroCommunity\Raindrop\Classes\UrlHelper;
-use HydroCommunity\Raindrop\Classes\UserHelper;
+use HydroCommunity\Raindrop\Classes\MfaUser;
 use Illuminate\Http\Request;
 
 /**
@@ -26,19 +26,25 @@ class Mfa extends BaseMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!$this->sessionHelper->hasUserId()) {
+        if (!$this->mfaSession->isStarted()) {
             return $next($request);
         }
 
-        $user = $this->sessionHelper->getUser();
-
-        $userHelper = new UserHelper($user);
         $urlHelper = new UrlHelper();
+
+        if (!$this->mfaSession->isValid()) {
+            $this->mfaSession->destroy();
+            return $urlHelper->getSignOnResponse();
+        }
+
+        $user = $this->mfaSession->getUser();
+
+        $userHelper = new MfaUser($user);
 
         if ($userHelper->requiresMfa()
             && $urlHelper->getMfaUrl() !== $request->url()
         ) {
-            return response()->redirectTo($urlHelper->getMfaUrl());
+            return $urlHelper->getMfaResponse();
         }
 
         return $next($request);

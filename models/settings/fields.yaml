@@ -5,6 +5,22 @@
 tabs:
     fields:
         #
+        # General
+        #
+        page_sign_on:
+            tab: "General"
+            label: "Login page"
+            comment: "Select the page which contains the login form."
+            type: dropdown
+            span: left
+        page_redirect:
+            tab: "General"
+            label: "Redirect to"
+            comment: "Page to redirect to after successful sign in and MFA."
+            type: dropdown
+            span: left
+
+        #
         # API Settings
         #
         application_id:
@@ -61,3 +77,4 @@ tabs:
             span: left
             type: number
             comment: "The user account will be blocked if the number of attempts exceeds this value."
+

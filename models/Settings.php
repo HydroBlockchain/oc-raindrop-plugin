@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop\Models;
 
+use Cms\Classes\Page;
 use October\Rain\Database\Model;
 use System\Behaviors\SettingsModel;
 
@@ -26,4 +27,23 @@ class Settings extends Model
     public $settingsCode = 'hydrocommunity_raindrop_settings';
 
     public $settingsFields = 'fields.yaml';
+
+    /**
+     * @return array
+     */
+    public function getPageSignOnOptions(): array
+    {
+        return Page::sortBy('baseFileName')
+                ->lists('baseFileName', 'baseFileName');
+    }
+
+    /**
+     * @return array
+     */
+    public function getPageRedirectOptions(): array
+    {
+        return ['' => '- refresh page -']
+            + Page::sortBy('baseFileName')
+                ->lists('baseFileName', 'baseFileName');
+    }
 }

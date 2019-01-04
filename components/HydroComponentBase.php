@@ -7,7 +7,7 @@ namespace HydroCommunity\Raindrop\Components;
 use Adrenth\Raindrop;
 use Cms\Classes\CodeBase;
 use Cms\Classes\ComponentBase;
-use HydroCommunity\Raindrop\Classes\SessionHelper;
+use HydroCommunity\Raindrop\Classes\MfaSession;
 use HydroCommunity\Raindrop\Classes\UrlHelper;
 use Illuminate\Contracts\Logging\Log;
 use Illuminate\Http\Request;
@@ -36,9 +36,9 @@ abstract class HydroComponentBase extends ComponentBase
     protected $urlHelper;
 
     /**
-     * @var SessionHelper
+     * @var MfaSession
      */
-    protected $sessionHelper;
+    protected $mfaSession;
 
     /**
      * @var FlashBag
@@ -63,7 +63,7 @@ abstract class HydroComponentBase extends ComponentBase
         $this->request = resolve(Request::class);
         $this->log = resolve(Log::class);
         $this->urlHelper = new UrlHelper();
-        $this->sessionHelper = new SessionHelper();
+        $this->mfaSession = new MfaSession();
         $this->flash = resolve(FlashBag::class);
         $this->client = resolve(Raindrop\Client::class);
     }

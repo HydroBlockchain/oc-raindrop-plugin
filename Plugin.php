@@ -40,15 +40,12 @@ class Plugin extends PluginBase
      */
     public function pluginDetails(): array
     {
-        return array_merge(
-            (array) parent::pluginDetails(),
-            [
-                'name' => 'Hydro Raindrop',
-                'description' => 'Integrates Hydro Raindrop MFA to OctoberCMS.',
-                'author' => 'Hydro Community',
-                'icon' => 'icon-leaf',
-            ]
-        );
+        return [
+            'name' => 'Hydro Raindrop',
+            'description' => 'Integrates Hydro Raindrop MFA to OctoberCMS.',
+            'author' => 'Hydro Community',
+            'icon' => 'icon-leaf',
+        ];
     }
 
     /**

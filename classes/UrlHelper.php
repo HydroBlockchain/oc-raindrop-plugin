@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop\Classes;
 
+use Cms\Classes\Page;
 use Cms\Helpers\Cms;
+use HydroCommunity\Raindrop\Models\Settings;
+use Illuminate\Http\RedirectResponse;
 
 /**
  * Class UrlHelper
@@ -35,10 +38,55 @@ class UrlHelper
     }
 
     /**
+     * @return RedirectResponse
+     */
+    public function getSetupResponse(): RedirectResponse
+    {
+        return redirect()->to($this->getSetupUrl());
+    }
+
+    /**
      * @return string
      */
     public function getMfaUrl(): string
     {
         return $this->cmsHelper->url(self::URL_MFA);
+    }
+
+    /**
+     * @return RedirectResponse
+     */
+    public function getMfaResponse(): RedirectResponse
+    {
+        return redirect()->to($this->getMfaUrl());
+    }
+
+    /**
+     * @return RedirectResponse
+     */
+    public function getSignOnResponse(): RedirectResponse
+    {
+        $page = Settings::get('page_sign_on');
+        $url = '/';
+
+        if (!empty($page)) {
+            $url = Page::url($page);
+        }
+
+        return redirect()->to($url);
+    }
+
+    /**
+     * @return RedirectResponse
+     */
+    public function getRedirectResponse(): RedirectResponse
+    {
+        $page = Settings::get('page_redirect');
+
+        if ($page === '') {
+            return redirect()->refresh();
+        }
+
+        return redirect()->to(Page::url($page));
     }
 }

@@ -9,8 +9,8 @@ use Adrenth\Raindrop\Exception\UnregisterUserFailed;
 use Adrenth\Raindrop\Exception\UserAlreadyMappedToApplication;
 use HydroCommunity\Raindrop\Classes\Exceptions\InvalidUserInSession;
 use HydroCommunity\Raindrop\Classes\Exceptions\UserIdNotFoundInSessionStorage;
-use HydroCommunity\Raindrop\Classes\SessionHelper;
-use HydroCommunity\Raindrop\Classes\UserHelper;
+use HydroCommunity\Raindrop\Classes\MfaSession;
+use HydroCommunity\Raindrop\Classes\MfaUser;
 use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,7 +34,7 @@ class HydroSetup extends HydroComponentBase
     public $skipAllowed = false;
 
     /**
-     * @var UserHelper
+     * @var MfaUser
      */
     private $userHelper;
 
@@ -72,7 +72,7 @@ class HydroSetup extends HydroComponentBase
      */
     protected function prepareVars(): void
     {
-        $this->userHelper = UserHelper::createFromSession();
+        $this->userHelper = MfaUser::createFromSession();
         $this->skipAllowed = Settings::get('mfa_method') !== Settings::MFA_METHOD_ENFORCED;
     }
 
@@ -107,9 +107,9 @@ class HydroSetup extends HydroComponentBase
             return redirect('/');
         }
 
-        $user = $this->userHelper->getUser();
+        $user = $this->userHelper->getUserModel();
 
-        $this->sessionHelper->forgetUserId();
+        $this->mfaSession->forgetUserId();
 
         $mfaMethod = Settings::get('mfa_method');
 
@@ -164,7 +164,7 @@ class HydroSetup extends HydroComponentBase
     {
         $redirectTo = $this->urlHelper->getMfaUrl();
 
-        $user = $this->userHelper->getUser();
+        $user = $this->userHelper->getUserModel();
 
         try {
             // TODO: Waiting for Hydro app to work.
@@ -216,7 +216,7 @@ class HydroSetup extends HydroComponentBase
             'mfa_failed_attempts' => 0,
         ]);
 
-        $this->sessionHelper->setAction(SessionHelper::ACTION_VERIFY);
+        $this->mfaSession->setAction(MfaSession::ACTION_VERIFY);
 
         // TODO: Trigger event.
 
