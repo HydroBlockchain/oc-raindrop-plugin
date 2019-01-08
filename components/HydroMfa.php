@@ -6,6 +6,7 @@ namespace HydroCommunity\Raindrop\Components;
 
 use Adrenth\Raindrop\Exception\UnregisterUserFailed;
 use Adrenth\Raindrop\Exception\VerifySignatureFailed;
+use Exception;
 use HydroCommunity\Raindrop\Classes\Exceptions\InvalidUserInSession;
 use HydroCommunity\Raindrop\Classes\Exceptions\MessageNotFoundInSessionStorage;
 use HydroCommunity\Raindrop\Classes\Exceptions\UserIdNotFoundInSessionStorage;
@@ -45,6 +46,7 @@ class HydroMfa extends HydroComponentBase
 
     /**
      * {@inheritdoc}
+     * @throws Exception
      */
     public function onRun()
     {
@@ -63,7 +65,7 @@ class HydroMfa extends HydroComponentBase
     /**
      * @throws InvalidUserInSession
      * @throws UserIdNotFoundInSessionStorage
-     * @throws \Exception
+     * @throws Exception
      */
     protected function prepareVars(): void
     {
@@ -78,7 +80,7 @@ class HydroMfa extends HydroComponentBase
 
     /**
      * @return RedirectResponse|array
-     * @throws \Exception
+     * @throws Exception
      */
     public function onAuthenticate()
     {
@@ -100,7 +102,7 @@ class HydroMfa extends HydroComponentBase
 
     /**
      * @return RedirectResponse
-     * @throws \Exception
+     * @throws Exception
      */
     public function onCancel(): RedirectResponse
     {
@@ -196,7 +198,7 @@ class HydroMfa extends HydroComponentBase
      */
     private function handleMfaFailure()
     {
-        $this->flash->error(trans('Authentication failed, please try again.'));
+        $this->mfaSession->setFlashMessage('Authentication failed, please try again.');
         $this->mfaSession->forgetMessage();
 
         $user = $this->userHelper->getUserModel();
@@ -215,17 +217,17 @@ class HydroMfa extends HydroComponentBase
                 'mfa_failed_attempts' => 0
             ]);
 
-            $this->flash->error(trans('Your account has been blocked.'));
-
+            $this->mfaSession->setFlashMessage('Your account has been blocked.');
             $this->mfaSession->destroy();
 
-            return redirect()->to('/');
+            return (new UrlHelper())->getSignOnResponse();
         }
 
         $this->prepareVars();
 
         return [
-            '#hydroDigits' => $this->renderPartial($this->alias . '::_message')
+            '#hydroDigits' => $this->renderPartial($this->alias . '::_message'),
+            '#hydroFlash' => $this->controller->renderComponent('hydroCommunityHydroFlash', ['type' => 'error']),
         ];
     }
 }

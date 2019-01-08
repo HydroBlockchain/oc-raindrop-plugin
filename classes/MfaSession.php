@@ -22,6 +22,7 @@ final class MfaSession
     private const SESSION_KEY_ACTION = 'hydro_community_raindrop_action';
     private const SESSION_KEY_MESSAGE = 'hydro_community_raindrop_message';
     private const SESSION_KEY_TIME = 'hydro_community_raindrop_time';
+    private const SESSION_KEY_FLASH_MESSAGE = 'hydro_community_raindrop_flash_message';
 
     public const ACTION_ENABLE = 'enable';
     public const ACTION_VERIFY = 'verify';
@@ -49,7 +50,7 @@ final class MfaSession
     /**
      * @return MfaSession
      */
-    public function start(): self
+    public function start(): MfaSession
     {
         $this->destroy();
 
@@ -236,6 +237,24 @@ final class MfaSession
     {
         $this->store->forget(self::SESSION_KEY_MESSAGE);
         return $this;
+    }
+
+    /**
+     * @param string $message
+     * @return MfaSession
+     */
+    public function setFlashMessage(string $message): MfaSession
+    {
+        $this->store->put(self::SESSION_KEY_FLASH_MESSAGE, $message);
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFlashMessage(): string
+    {
+        return $this->store->pull(self::SESSION_KEY_FLASH_MESSAGE, '');
     }
 
     /**

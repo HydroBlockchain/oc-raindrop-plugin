@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace HydroCommunity\Raindrop;
 
 use Backend\Widgets\Form;
+use Cms\Classes\Controller;
+use HydroCommunity\Raindrop\Classes\MfaSession;
 use HydroCommunity\Raindrop\Classes\Middleware;
 use HydroCommunity\Raindrop\Classes\RequirementChecker;
-use HydroCommunity\Raindrop\Components\HydroMfa;
-use HydroCommunity\Raindrop\Components\HydroSetup;
-use HydroCommunity\Raindrop\Models\Settings;
-use HydroCommunity\Raindrop\Models\UserMeta;
+use HydroCommunity\Raindrop\Components;
+use HydroCommunity\Raindrop\Models;
 use HydroCommunity\Raindrop\ServiceProviders\HydroRaindrop;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Session\Middleware\StartSession;
@@ -53,8 +53,9 @@ class Plugin extends PluginBase
     public function registerComponents(): array
     {
         return [
-            HydroMfa::class => 'hydroCommunityHydroMfa',
-            HydroSetup::class => 'hydroCommunityHydroSetup',
+            Components\HydroMfa::class => 'hydroCommunityHydroMfa',
+            Components\HydroSetup::class => 'hydroCommunityHydroSetup',
+            Components\HydroFlash::class => 'hydroCommunityHydroFlash',
         ];
     }
 
@@ -80,7 +81,7 @@ class Plugin extends PluginBase
                 'description' => 'Manage Hydro Raindrop settings.',
                 'category' => SettingsManager::CATEGORY_USERS,
                 'icon' => 'icon-tint',
-                'class' => Settings::class,
+                'class' => Models\Settings::class,
                 'order' => 500,
                 'permissions' => ['hydrocommunity.raindrop.access_settings'],
             ],
@@ -91,7 +92,9 @@ class Plugin extends PluginBase
     /** @noinspection PhpMissingDocCommentInspection */
     public function boot()
     {
-        // Do not boot the plugin when PHP version is too low.
+        /*
+         * Do not boot the plugin when PHP version is too low.
+         */
         if (version_compare(PHP_VERSION, '7.1.0') <= 0) {
             return;
         }
@@ -111,22 +114,28 @@ class Plugin extends PluginBase
                 ->prependMiddleware(StartSession::class); // Make sure the session is available.
         }
 
+        /*
+         * Add database relation to User model.
+         */
         User::extend(function (User $model) {
             $model->hasOne['meta'] = [
-                UserMeta::class,
+                Models\UserMeta::class,
                 'key' => 'user_id',
                 'delete' => true,
             ];
             $model->bindEvent('model.afterFetch', function () use ($model) {
-                $meta = $model->hasOne(UserMeta::class)->first();
+                $meta = $model->hasOne(Models\UserMeta::class)->first();
                 if ($meta === null) {
-                    UserMeta::create([
+                    Models\UserMeta::create([
                         'user_id' => $model->getKey(),
                     ]);
                 }
             });
         });
 
+        /*
+         * Add the "blocked" form element to the User edit form.
+         */
         Event::listen('backend.form.extendFields', function (Form $form) {
             if ($form->model instanceof User || $form->getController() instanceof Users) {
                 $form->addFields([
@@ -138,7 +147,7 @@ class Plugin extends PluginBase
                 ]);
             }
 
-            if ($form->model instanceof Settings) {
+            if ($form->model instanceof Models\Settings) {
                 $requirementChecker = new RequirementChecker();
 
                 if (!$requirementChecker->passes()) {
@@ -148,6 +157,31 @@ class Plugin extends PluginBase
                 }
             }
         });
+
+        /*
+         * Add the HydroFlash component to each and every page.
+         */
+        Event::listen(
+            'cms.page.initComponents',
+            function (Controller $controller) {
+                $controller->addComponent('hydroCommunityHydroFlash', 'hydroCommunityHydroFlash', [], true);
+            }
+        );
+
+        /*
+         * Add the Hydro Flash Component to the RainLab.User SignIn component so that
+         * Hydro MFA messages will be rendered at the top of the Sign In form.
+         */
+        Event::listen(
+            'cms.page.renderPartial',
+            function (Controller $controller, string $partialName, string &$partialContent) {
+                if ($partialName === 'account::signin') {
+                    $controller->addCss('/plugins/hydrocommunity/raindrop/assets/css/hydro-raindrop.css');
+                    $result = (string) $controller->renderComponent('hydroCommunityHydroFlash', ['type' => 'error']);
+                    $partialContent = $result . $partialContent;
+                }
+            }
+        );
     }
 
     /** @noinspection ReturnTypeCanBeDeclaredInspection */

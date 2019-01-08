@@ -202,8 +202,6 @@ class HydroSetup extends HydroComponentBase
                 'mfa_failed_attempts' => 0,
             ]);
 
-            // TODO: Trigger event.
-
             throw new ValidationException([
                 'hydro_id' => e(trans($e->getMessage()))
             ]);
@@ -217,8 +215,6 @@ class HydroSetup extends HydroComponentBase
         ]);
 
         $this->mfaSession->setAction(MfaSession::ACTION_VERIFY);
-
-        // TODO: Trigger event.
 
         return redirect()->to($redirectTo);
     }

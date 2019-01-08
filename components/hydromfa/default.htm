@@ -22,6 +22,9 @@
                         {% partial __SELF__ ~ '::_message' %}
                     </div>
                     <div class="validation-message" data-validate-for="hydro-digits"></div>
+                    <div id="hydroFlash">
+                        {% component 'hydroCommunityHydroFlash' %}
+                    </div>
                 </div>
                 <div class="item actions">
                     <input type="button"

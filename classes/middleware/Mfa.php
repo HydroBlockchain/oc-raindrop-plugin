@@ -74,8 +74,15 @@ class Mfa extends BaseMiddleware
 
         if (!$this->mfaSession->isValid()) {
             $this->log->warning('Hydro Raindrop: MFA Session time-out detected, redirecting to sign on page.');
-            // TODO: Set Flash message ->withErrors
+            $this->mfaSession->setFlashMessage('Session timed out, please sign in again.');
             $this->mfaSession->destroy();
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'X_OCTOBER_REDIRECT' => $urlHelper->getSignOnResponse()->getTargetUrl(),
+                ]);
+            }
+
             return $urlHelper->getSignOnResponse();
         }
 
@@ -85,6 +92,13 @@ class Mfa extends BaseMiddleware
             && $urlHelper->getSetupUrl() !== $request->url()
         ) {
             $this->log->info('Hydro Raindrop: User must set up MFA. Redirecting to Setup page.');
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'X_OCTOBER_REDIRECT' => $urlHelper->getSetupResponse()->getTargetUrl(),
+                ]);
+            }
+
             return $urlHelper->getSetupResponse();
         }
 
@@ -92,6 +106,13 @@ class Mfa extends BaseMiddleware
             && $urlHelper->getMfaUrl() !== $request->url()
         ) {
             $this->log->info('Hydro Raindrop: User must perform MFA. Redirecting to MFA page.');
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'X_OCTOBER_REDIRECT' => $urlHelper->getMfaResponse()->getTargetUrl(),
+                ]);
+            }
+
             return $urlHelper->getMfaResponse();
         }
 
@@ -106,7 +127,8 @@ class Mfa extends BaseMiddleware
         $mfaSession = new MfaSession();
         $mfaSession->start()
             ->setUserId((int) $user->getKey())
-            ->setAction(MfaSession::ACTION_ENABLE);
+            ->setAction(MfaSession::ACTION_ENABLE)
+            ->setFlashMessage('Enter the security code into the Hydro app to enable Hydro Raindrop MFA.');
     }
 
     /**
@@ -117,6 +139,7 @@ class Mfa extends BaseMiddleware
         $mfaSession = new MfaSession();
         $mfaSession->start()
             ->setUserId((int) $user->getKey())
-            ->setAction(MfaSession::ACTION_DISABLE);
+            ->setAction(MfaSession::ACTION_DISABLE)
+            ->setFlashMessage('Enter the security code into the Hydro app to disable Hydro Raindrop MFA.');
     }
 }
