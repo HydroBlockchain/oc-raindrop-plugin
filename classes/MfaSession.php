@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop\Classes;
 
+use Backend\Models\User as BackendUser;
 use HydroCommunity\Raindrop\Classes\Exceptions\InvalidUserInSession;
 use HydroCommunity\Raindrop\Classes\Exceptions\MessageNotFoundInSessionStorage;
 use HydroCommunity\Raindrop\Classes\Exceptions\UserIdNotFoundInSessionStorage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Session\Store;
-use RainLab\User\Models\User;
+use October\Rain\Auth\Models\User;
+use RainLab\User\Models\User as FrontEndUser;
 
 /**
  * Class MfaSession
@@ -18,11 +20,12 @@ use RainLab\User\Models\User;
  */
 final class MfaSession
 {
-    private const SESSION_KEY_USER = 'hydro_community_raindrop_user';
-    private const SESSION_KEY_ACTION = 'hydro_community_raindrop_action';
-    private const SESSION_KEY_MESSAGE = 'hydro_community_raindrop_message';
-    private const SESSION_KEY_TIME = 'hydro_community_raindrop_time';
-    private const SESSION_KEY_FLASH_MESSAGE = 'hydro_community_raindrop_flash_message';
+    private const KEY_BACKEND = 'hydro_community_raindrop_backend';
+    private const KEY_USER = 'hydro_community_raindrop_user';
+    private const KEY_ACTION = 'hydro_community_raindrop_action';
+    private const KEY_MESSAGE = 'hydro_community_raindrop_message';
+    private const KEY_TIME = 'hydro_community_raindrop_time';
+    private const KEY_FLASH_MESSAGE = 'hydro_community_raindrop_flash_message';
 
     public const ACTION_ENABLE = 'enable';
     public const ACTION_VERIFY = 'verify';
@@ -41,6 +44,7 @@ final class MfaSession
     private $store;
 
     /**
+     * Construct the MFA Session.
      */
     public function __construct()
     {
@@ -48,16 +52,17 @@ final class MfaSession
     }
 
     /**
+     * @param bool $backend
+     * @param int $userId
      * @return MfaSession
      */
-    public function start(): MfaSession
+    public function start(bool $backend, int $userId): MfaSession
     {
         $this->destroy();
 
-        $this->store->put(
-            self::SESSION_KEY_TIME,
-            time() + self::SESSION_LIFETIME
-        );
+        $this->store->put(self::KEY_BACKEND, $backend);
+        $this->store->put(self::KEY_TIME, time() + self::SESSION_LIFETIME);
+        $this->store->put(self::KEY_USER, $userId);
 
         return $this;
     }
@@ -67,7 +72,7 @@ final class MfaSession
      */
     public function isStarted(): bool
     {
-        return $this->store->has(self::SESSION_KEY_TIME);
+        return $this->store->has(self::KEY_TIME);
     }
 
     /**
@@ -75,13 +80,21 @@ final class MfaSession
      */
     public function isValid(): bool
     {
-        if (!$this->store->has(self::SESSION_KEY_TIME)) {
+        if (!$this->store->has(self::KEY_TIME)) {
             return false;
         }
 
-        $time = $this->store->get(self::SESSION_KEY_TIME);
+        $time = $this->store->get(self::KEY_TIME);
 
         return time() <= $time;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBackend(): bool
+    {
+        return $this->store->get(self::KEY_BACKEND, false);
     }
 
     /**
@@ -91,17 +104,23 @@ final class MfaSession
      */
     public function getUser(): User
     {
+        /** @var User $user */
         $user = null;
 
-        $sessionHelper = new MfaSession();
+        if (!$this->store->has(self::KEY_USER)) {
+            throw new UserIdNotFoundInSessionStorage('User ID not found in session storage.');
+        }
 
-        $userId = $sessionHelper->getUserId();
+        $userId = (int) $this->store->get(self::KEY_USER);
 
         try {
-            /** @var User $user */
-            $user = User::query()->findOrFail($userId);
+            if ($this->isBackend()) {
+                $user = BackendUser::query()->findOrFail($userId);
+            } else {
+                $user = FrontEndUser::query()->findOrFail($userId);
+            }
         } catch (ModelNotFoundException $e) {
-            $sessionHelper->forgetUserId();
+            $this->store->forget(self::KEY_USER);
             throw InvalidUserInSession::withIdentifier($userId);
         }
 
@@ -109,51 +128,11 @@ final class MfaSession
     }
 
     /**
-     * @return int
-     * @throws UserIdNotFoundInSessionStorage
-     */
-    public function getUserId(): int
-    {
-        if (!$this->hasUserId()) {
-            throw new UserIdNotFoundInSessionStorage('User ID not found in session storage.');
-        }
-
-        return (int) $this->store->get(self::SESSION_KEY_USER);
-    }
-
-    /**
-     * @param int $userId
-     * @return MfaSession
-     */
-    public function setUserId(int $userId): MfaSession
-    {
-        $this->store->put(self::SESSION_KEY_USER, $userId);
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasUserId(): bool
-    {
-        return $this->store->has(self::SESSION_KEY_USER);
-    }
-
-    /**
-     * @return MfaSession
-     */
-    public function forgetUserId(): MfaSession
-    {
-        $this->store->forget(self::SESSION_KEY_USER);
-        return $this;
-    }
-
-    /**
      * @return bool
      */
     public function isActionEnable(): bool
     {
-        return $this->store->get(self::SESSION_KEY_ACTION) === self::ACTION_ENABLE;
+        return $this->store->get(self::KEY_ACTION) === self::ACTION_ENABLE;
     }
 
     /**
@@ -161,7 +140,7 @@ final class MfaSession
      */
     public function isActionDisable(): bool
     {
-        return $this->store->get(self::SESSION_KEY_ACTION) === self::ACTION_DISABLE;
+        return $this->store->get(self::KEY_ACTION) === self::ACTION_DISABLE;
     }
 
     /**
@@ -169,7 +148,7 @@ final class MfaSession
      */
     public function isActionVerify(): bool
     {
-        return $this->store->get(self::SESSION_KEY_ACTION) === self::ACTION_VERIFY;
+        return $this->store->get(self::KEY_ACTION) === self::ACTION_VERIFY;
     }
 
     /**
@@ -178,7 +157,7 @@ final class MfaSession
      */
     public function setAction(string $action): MfaSession
     {
-        $this->store->put(self::SESSION_KEY_ACTION, $action);
+        $this->store->put(self::KEY_ACTION, $action);
         return $this;
     }
 
@@ -187,7 +166,7 @@ final class MfaSession
      */
     public function hasAction(): bool
     {
-        return $this->store->has(self::SESSION_KEY_ACTION);
+        return $this->store->has(self::KEY_ACTION);
     }
 
     /**
@@ -195,7 +174,7 @@ final class MfaSession
      */
     public function forgetAction(): MfaSession
     {
-        $this->store->forget(self::SESSION_KEY_ACTION);
+        $this->store->forget(self::KEY_ACTION);
         return $this;
     }
 
@@ -205,11 +184,13 @@ final class MfaSession
      */
     public function getMessage(): int
     {
-        if (!$this->store->has(self::SESSION_KEY_MESSAGE)) {
-            throw new MessageNotFoundInSessionStorage('No message found in session storage. Generate a message first.');
+        if (!$this->store->has(self::KEY_MESSAGE)) {
+            throw new MessageNotFoundInSessionStorage(
+                'No message found in session storage. Generate a message first.'
+            );
         }
 
-        return $this->store->get(self::SESSION_KEY_MESSAGE);
+        return $this->store->get(self::KEY_MESSAGE);
     }
 
     /**
@@ -218,7 +199,7 @@ final class MfaSession
      */
     public function setMessage(int $message): MfaSession
     {
-        $this->store->put(self::SESSION_KEY_MESSAGE, $message);
+        $this->store->put(self::KEY_MESSAGE, $message);
         return $this;
     }
 
@@ -227,7 +208,7 @@ final class MfaSession
      */
     public function hasMessage(): bool
     {
-        return $this->store->has(self::SESSION_KEY_MESSAGE);
+        return $this->store->has(self::KEY_MESSAGE);
     }
 
     /**
@@ -235,7 +216,7 @@ final class MfaSession
      */
     public function forgetMessage(): MfaSession
     {
-        $this->store->forget(self::SESSION_KEY_MESSAGE);
+        $this->store->forget(self::KEY_MESSAGE);
         return $this;
     }
 
@@ -245,7 +226,7 @@ final class MfaSession
      */
     public function setFlashMessage(string $message): MfaSession
     {
-        $this->store->put(self::SESSION_KEY_FLASH_MESSAGE, $message);
+        $this->store->put(self::KEY_FLASH_MESSAGE, $message);
         return $this;
     }
 
@@ -254,7 +235,7 @@ final class MfaSession
      */
     public function getFlashMessage(): string
     {
-        return $this->store->pull(self::SESSION_KEY_FLASH_MESSAGE, '');
+        return (string) $this->store->pull(self::KEY_FLASH_MESSAGE, '');
     }
 
     /**
@@ -263,9 +244,10 @@ final class MfaSession
     public function destroy(): MfaSession
     {
         $this->forgetMessage();
-        $this->forgetUserId();
         $this->forgetAction();
-        $this->store->forget(self::SESSION_KEY_TIME);
+        $this->store->forget(self::KEY_USER);
+        $this->store->forget(self::KEY_TIME);
+
         return $this;
     }
 }

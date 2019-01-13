@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop\Models;
 
+use Backend\Models\User;
 use October\Rain\Database\Model;
-use RainLab\User\Models\User;
 
 /**
- * Class UserMeta
+ * Class BackendUserMeta
  *
  * @package HydroCommunity\Raindrop\Models
  */
-class UserMeta extends Model
+class BackendUserMeta extends Model
 {
     /**
      * {@inheritdoc}
      */
-    protected $table = 'hydrocommunity_raindrop_users_meta';
+    protected $table = 'hydrocommunity_raindrop_backend_users_meta';
 
     /**
      * {@inheritdoc}

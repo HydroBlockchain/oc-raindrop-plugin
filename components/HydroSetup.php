@@ -11,14 +11,15 @@ use HydroCommunity\Raindrop\Classes\Exceptions\InvalidUserInSession;
 use HydroCommunity\Raindrop\Classes\Exceptions\UserIdNotFoundInSessionStorage;
 use HydroCommunity\Raindrop\Classes\MfaSession;
 use HydroCommunity\Raindrop\Classes\MfaUser;
-use HydroCommunity\Raindrop\Classes\UrlHelper;
+use HydroCommunity\Raindrop\Classes\Helpers\UrlHelper;
 use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Factory;
 use InvalidArgumentException;
 use October\Rain\Exception\ValidationException;
-use RainLab\User\Classes\AuthManager;
+use RainLab\User\Classes\AuthManager as FrontEndAuthManager;
+use Backend\Classes\AuthManager as BackendAuthManager;
 
 /**
  * Class SetupHydroID
@@ -110,6 +111,8 @@ class HydroSetup extends HydroComponentBase
 
         $user = $this->userHelper->getUserModel();
 
+        $isBackend = $this->mfaSession->isBackend();
+
         $this->mfaSession->destroy();
 
         $mfaMethod = Settings::get('mfa_method');
@@ -117,8 +120,13 @@ class HydroSetup extends HydroComponentBase
         if ($mfaMethod === Settings::MFA_METHOD_OPTIONAL
             || $mfaMethod === Settings::MFA_METHOD_PROMPTED
         ) {
-            AuthManager::instance()->login($user, false);
-            return (new UrlHelper())->getRedirectResponse();
+            if ($isBackend) {
+                BackendAuthManager::instance()->login($user, false);
+            } else {
+                FrontEndAuthManager::instance()->login($user, false);
+            }
+
+            return (new UrlHelper())->getRedirectResponse($isBackend);
         }
 
         return (new UrlHelper())->getSignOnResponse();

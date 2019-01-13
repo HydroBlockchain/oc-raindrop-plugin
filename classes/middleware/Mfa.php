@@ -7,7 +7,7 @@ namespace HydroCommunity\Raindrop\Classes\Middleware;
 use Closure;
 use HydroCommunity\Raindrop\Classes\Exceptions;
 use HydroCommunity\Raindrop\Classes\MfaSession;
-use HydroCommunity\Raindrop\Classes\UrlHelper;
+use HydroCommunity\Raindrop\Classes\Helpers\UrlHelper;
 use HydroCommunity\Raindrop\Classes\MfaUser;
 use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\Request;
@@ -124,9 +124,10 @@ class Mfa extends BaseMiddleware
      */
     private function enable(User $user): void
     {
+        // TODO: parameter backend true/false
+
         $mfaSession = new MfaSession();
-        $mfaSession->start()
-            ->setUserId((int) $user->getKey())
+        $mfaSession->start(false, $user->getKey())
             ->setAction(MfaSession::ACTION_ENABLE)
             ->setFlashMessage('Enter the security code into the Hydro app to enable Hydro Raindrop MFA.');
     }
@@ -136,9 +137,10 @@ class Mfa extends BaseMiddleware
      */
     private function disable(User $user): void
     {
+        // TODO: parameter backend true/false
+
         $mfaSession = new MfaSession();
-        $mfaSession->start()
-            ->setUserId((int) $user->getKey())
+        $mfaSession->start(false, $user->getKey())
             ->setAction(MfaSession::ACTION_DISABLE)
             ->setFlashMessage('Enter the security code into the Hydro app to disable Hydro Raindrop MFA.');
     }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace HydroCommunity\Raindrop\Classes;
+namespace HydroCommunity\Raindrop\Classes\Helpers;
 
 use Cms\Classes\Page;
 use Cms\Helpers\Cms;
@@ -14,7 +14,7 @@ use Illuminate\Http\RedirectResponse;
  *
  * @package HydroCommunity\Raindrop\Classes
  */
-class UrlHelper
+final class UrlHelper
 {
     public const URL_SETUP = '/hydro-raindrop/setup';
     public const URL_MFA = '/hydro-raindrop/mfa';
@@ -77,10 +77,17 @@ class UrlHelper
     }
 
     /**
+     * @param bool $backend
      * @return RedirectResponse
      */
-    public function getRedirectResponse(): RedirectResponse
+    public function getRedirectResponse(bool $backend): RedirectResponse
     {
+        if ($backend) {
+            /** @var \Backend\Helpers\Cms $helper */
+            $helper = resolve(\Backend\Helpers\Cms::class);
+            return redirect()->to($helper->url());
+        }
+
         $page = Settings::get('page_redirect');
 
         if ($page === '') {

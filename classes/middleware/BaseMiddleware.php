@@ -14,8 +14,6 @@ use Psr\Log\LoggerInterface;
  */
 abstract class BaseMiddleware
 {
-    public const SESSION_KEY_USER = 'hydro_community_raindrop_user_id';
-
     /**
      * @var LoggerInterface
      */

@@ -4,28 +4,52 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop\Classes\Middleware;
 
+use Backend\Classes\AuthManager;
+use Backend\Helpers\Cms as BackendHelper;
+use Backend\Models\User;
 use Closure;
-use HydroCommunity\Raindrop\Classes\MfaUser;
+use Cms\Helpers\Cms;
+use Cms\Helpers\Cms as CmsHelper;
 use HydroCommunity\Raindrop\Classes\Helpers\UrlHelper;
+use HydroCommunity\Raindrop\Classes\MfaSession;
+use HydroCommunity\Raindrop\Classes\MfaUser;
 use Illuminate\Http\Request;
 use October\Rain\Auth\AuthException;
-use RainLab\User\Classes\AuthManager;
-use RainLab\User\Models\User;
+use Psr\Log\LoggerInterface;
 use Throwable;
 
 /**
- * Class SignOnMiddleware
+ * Class BackendSignOn
  *
  * @package HydroCommunity\Raindrop\Classes\Middleware
  */
-class SignOn extends BaseMiddleware
+class BackendSignOn
 {
     /**
-     * Intercept the Sign-on request (if applicable).
-     *
-     * @param $request
+     * @var CmsHelper
+     */
+    private $cmsHelper;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $log;
+
+    /**
+     * @param Cms $cmsHelper
+     * @param Request $request
+     * @param LoggerInterface $log
+     */
+    public function __construct(CmsHelper $cmsHelper, LoggerInterface $log)
+    {
+        $this->cmsHelper = $cmsHelper;
+        $this->log = $log;
+    }
+
+    /**
+     * @param Request $request
      * @param Closure $next
-     * @return mixed
+     * @return \Illuminate\Http\RedirectResponse|mixed
      * @throws AuthException
      */
     public function handle(Request $request, Closure $next)
@@ -41,13 +65,15 @@ class SignOn extends BaseMiddleware
 
             /** @var User $user */
             $user = AuthManager::instance()->findUserByCredentials([
-                $loginName => $request->request->get('login'),
-                'password' => $request->request->get('password'),
+                $loginName => $request->get('login'),
+                'password' => $request->get('password'),
             ]);
         } catch (Throwable $e) {
-            $this->log->warning('Hydro Raindrop: User could not be found with given credentials.');
+            $this->log->warning('Hydro Raindrop: Backend user could not be found with given credentials.');
             return $next($request);
         }
+
+        $mfaSession = new MfaSession();
 
         $redirectUri = null;
 
@@ -57,13 +83,13 @@ class SignOn extends BaseMiddleware
             throw new AuthException(trans('Your account has been blocked.'));
         }
 
-        $this->mfaSession->start(false, $user->getKey());
+        $mfaSession->start(true, $user->getKey());
 
         /*
          * Set up of Hydro Raindrop MFA is required.
          */
         if ($userHelper->requiresMfaSetup()) {
-            $this->log->info('User authenticates and requires Hydro Raindrop MFA Setup.');
+            $this->log->info('Backend user authenticates and requires Hydro Raindrop MFA Setup.');
             $redirectUri = UrlHelper::URL_SETUP;
         }
 
@@ -71,13 +97,11 @@ class SignOn extends BaseMiddleware
          * Hydro Raindrop MFA is required to proceed.
          */
         if ($userHelper->requiresMfa()) {
-            $this->log->info('User authenticates and requires Hydro Raindrop MFA.');
+            $this->log->info('Backend user authenticates and requires Hydro Raindrop MFA.');
             $redirectUri = UrlHelper::URL_MFA;
         }
 
-        return response()->json([
-            'X_OCTOBER_REDIRECT' => $redirectUri,
-        ]);
+        return redirect()->to($this->cmsHelper->url($redirectUri));
     }
 
     /**
@@ -86,9 +110,11 @@ class SignOn extends BaseMiddleware
      */
     public function isSignOnRequest(Request $request): bool
     {
-        return $request->ajax()
-            && $request->hasHeader('X-OCTOBER-REQUEST-HANDLER')
-            && $request->header('X-OCTOBER-REQUEST-HANDLER') === 'onSignin'
+        /** @var BackendHelper $backendHelper */
+        $backendHelper = resolve(BackendHelper::class);
+
+        return $request->url() === $backendHelper->url('backend/auth/signin')
+            && $request->method() === 'POST'
             && $request->has('login')
             && $request->has('password');
     }

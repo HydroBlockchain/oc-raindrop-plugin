@@ -9,16 +9,16 @@ use October\Rain\Database\Updates\Migration;
 use October\Rain\Support\Facades\Schema;
 
 /**
- * Class CreateUsersMetaTable
+ * Class CreateBackendUsersMetaTable
  *
  * @package HydroCommunity\Raindrop\Updates
  */
-class CreateUsersMetaTable extends Migration
+class CreateBackendUsersMetaTable extends Migration
 {
     /** @noinspection ReturnTypeCanBeDeclaredInspection */
     public function up()
     {
-        Schema::create('hydrocommunity_raindrop_users_meta', function (Blueprint $table) {
+        Schema::create('hydrocommunity_raindrop_backend_users_meta', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
             $table->unsignedInteger('user_id');
@@ -31,7 +31,7 @@ class CreateUsersMetaTable extends Migration
 
             $table->foreign('user_id')
                 ->references('id')
-                ->on('users')
+                ->on('backend_users')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
         });
@@ -40,6 +40,6 @@ class CreateUsersMetaTable extends Migration
     /** @noinspection ReturnTypeCanBeDeclaredInspection */
     public function down()
     {
-        Schema::dropIfExists('hydrocommunity_raindrop_users_meta');
+        Schema::dropIfExists('hydrocommunity_raindrop_backend_users_meta');
     }
 }

@@ -11,10 +11,11 @@ use HydroCommunity\Raindrop\Classes\Exceptions\InvalidUserInSession;
 use HydroCommunity\Raindrop\Classes\Exceptions\MessageNotFoundInSessionStorage;
 use HydroCommunity\Raindrop\Classes\Exceptions\UserIdNotFoundInSessionStorage;
 use HydroCommunity\Raindrop\Classes\MfaUser;
-use HydroCommunity\Raindrop\Classes\UrlHelper;
+use HydroCommunity\Raindrop\Classes\Helpers\UrlHelper;
 use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\RedirectResponse;
-use RainLab\User\Classes\AuthManager;
+use RainLab\User\Classes\AuthManager as FrontEndAuthManager;
+use Backend\Classes\AuthManager as BackendAuthManager;
 
 /**
  * Class HydroMfa
@@ -158,7 +159,11 @@ class HydroMfa extends HydroComponentBase
      */
     private function handleMfaSuccess(): RedirectResponse
     {
-        $authManager = AuthManager::instance();
+        if ($this->mfaSession->isBackend()) {
+            $authManager = BackendAuthManager::instance();
+        } else {
+            $authManager = FrontEndAuthManager::instance();
+        }
 
         $user = $this->userHelper->getUserModel();
 
@@ -186,9 +191,11 @@ class HydroMfa extends HydroComponentBase
             }
         }
 
+        $isBackend = $this->mfaSession->isBackend();
+
         $this->mfaSession->destroy();
 
-        return $this->urlHelper->getRedirectResponse();
+        return $this->urlHelper->getRedirectResponse($isBackend);
     }
 
     /**

@@ -8,7 +8,7 @@ use Adrenth\Raindrop;
 use Cms\Classes\CodeBase;
 use Cms\Classes\ComponentBase;
 use HydroCommunity\Raindrop\Classes\MfaSession;
-use HydroCommunity\Raindrop\Classes\UrlHelper;
+use HydroCommunity\Raindrop\Classes\Helpers\UrlHelper;
 use Illuminate\Contracts\Logging\Log;
 use Illuminate\Http\Request;
 use October\Rain\Flash\FlashBag;

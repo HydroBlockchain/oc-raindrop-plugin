@@ -6,7 +6,8 @@ namespace HydroCommunity\Raindrop\Classes;
 
 use HydroCommunity\Raindrop\Classes\Exceptions;
 use HydroCommunity\Raindrop\Models;
-use RainLab\User\Models\User;
+use October\Rain\Auth\Models\User;
+use October\Rain\Database\Model;
 
 /**
  * Class MfaUser
@@ -16,6 +17,8 @@ use RainLab\User\Models\User;
 class MfaUser
 {
     /**
+     * The Front-End or Back-End user model.
+     *
      * @var User
      */
     private $userModel;
@@ -36,8 +39,8 @@ class MfaUser
 
     /**
      * @return MfaUser
-     * @throws Exceptions\UserIdNotFoundInSessionStorage
      * @throws Exceptions\InvalidUserInSession
+     * @throws Exceptions\UserIdNotFoundInSessionStorage
      */
     public static function createFromSession(): self
     {
@@ -73,7 +76,7 @@ class MfaUser
      */
     public function requiresMfa(): bool
     {
-        /** @var Models\UserMeta $meta */
+        /** @var Model $meta */
         $meta = $this->userModel->meta;
 
         $hydroId = $meta->getAttribute('hydro_id');
