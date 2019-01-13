@@ -57,7 +57,7 @@ class HydroMfa extends HydroComponentBase
             $this->prepareVars();
         } catch (UserIdNotFoundInSessionStorage | InvalidUserInSession $e) {
             $this->log->error($e);
-            return (new UrlHelper())->getSignOnResponse();
+            return redirect()->to('/');
         }
 
         $this->addCss('assets/css/hydro-raindrop.css');
@@ -89,7 +89,7 @@ class HydroMfa extends HydroComponentBase
             $this->prepareVars();
         } catch (UserIdNotFoundInSessionStorage | InvalidUserInSession $e) {
             $this->log->error($e);
-            return (new UrlHelper())->getSignOnResponse();
+            return redirect()->to('/');
         }
 
         $signatureVerified = $this->verifySignatureLogin();
@@ -113,9 +113,11 @@ class HydroMfa extends HydroComponentBase
             $this->log->error($e);
         }
 
+        $isBackend = $this->mfaSession->isBackend();
+
         $this->mfaSession->destroy();
 
-        return (new UrlHelper())->getSignOnResponse();
+        return (new UrlHelper())->getSignOnResponse($isBackend);
     }
 
     /**
@@ -224,10 +226,12 @@ class HydroMfa extends HydroComponentBase
                 'mfa_failed_attempts' => 0
             ]);
 
+            $isBackend = $this->mfaSession->isBackend();
+
             $this->mfaSession->setFlashMessage('Your account has been blocked.');
             $this->mfaSession->destroy();
 
-            return (new UrlHelper())->getSignOnResponse();
+            return (new UrlHelper())->getSignOnResponse($isBackend);
         }
 
         $this->prepareVars();

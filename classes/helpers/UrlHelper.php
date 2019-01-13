@@ -62,10 +62,17 @@ final class UrlHelper
     }
 
     /**
+     * @param bool $backend
      * @return RedirectResponse
      */
-    public function getSignOnResponse(): RedirectResponse
+    public function getSignOnResponse(bool $backend = null): RedirectResponse
     {
+        if ($backend) {
+            /** @var \Backend\Helpers\Cms $helper */
+            $helper = resolve(\Backend\Helpers\Cms::class);
+            return redirect()->to($helper->url('backend/auth/signin'));
+        }
+
         $page = Settings::get('page_sign_on');
         $url = '/';
 

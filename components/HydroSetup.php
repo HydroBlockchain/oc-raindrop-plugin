@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Factory;
 use InvalidArgumentException;
 use October\Rain\Exception\ValidationException;
-use RainLab\User\Classes\AuthManager as FrontEndAuthManager;
+use RainLab\User\Classes\AuthManager as FrontendAuthManager;
 use Backend\Classes\AuthManager as BackendAuthManager;
 
 /**
@@ -62,7 +62,7 @@ class HydroSetup extends HydroComponentBase
             $this->prepareVars();
         } catch (UserIdNotFoundInSessionStorage | InvalidUserInSession $e) {
             $this->log->error($e);
-            return (new UrlHelper())->getSignOnResponse();
+            return redirect()->to('/');
         }
 
         $this->addCss('assets/css/hydro-raindrop.css');
@@ -90,7 +90,7 @@ class HydroSetup extends HydroComponentBase
             $this->prepareVars();
         } catch (UserIdNotFoundInSessionStorage | InvalidUserInSession $e) {
             $this->log->error($e);
-            return (new UrlHelper())->getSignOnResponse();
+            return redirect()->to('/');
         }
 
         return $this->registerUser((string) $this->request->get('hydro_id'));
@@ -106,7 +106,7 @@ class HydroSetup extends HydroComponentBase
             $this->prepareVars();
         } catch (UserIdNotFoundInSessionStorage | InvalidUserInSession $e) {
             $this->log->error($e);
-            return (new UrlHelper())->getSignOnResponse();
+            return redirect()->to('/');
         }
 
         $user = $this->userHelper->getUserModel();
@@ -123,13 +123,13 @@ class HydroSetup extends HydroComponentBase
             if ($isBackend) {
                 BackendAuthManager::instance()->login($user, false);
             } else {
-                FrontEndAuthManager::instance()->login($user, false);
+                FrontendAuthManager::instance()->login($user, false);
             }
 
             return (new UrlHelper())->getRedirectResponse($isBackend);
         }
 
-        return (new UrlHelper())->getSignOnResponse();
+        return (new UrlHelper())->getSignOnResponse($isBackend);
     }
 
     /**

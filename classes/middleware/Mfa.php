@@ -11,6 +11,7 @@ use HydroCommunity\Raindrop\Classes\Helpers\UrlHelper;
 use HydroCommunity\Raindrop\Classes\MfaUser;
 use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\Request;
+use October\Rain\Flash\FlashBag;
 use RainLab\User\Classes\AuthManager;
 use RainLab\User\Models\User;
 
@@ -72,18 +73,30 @@ class Mfa extends BaseMiddleware
 
         $urlHelper = new UrlHelper();
 
+        $isBackend = $this->mfaSession->isBackend();
+
         if (!$this->mfaSession->isValid()) {
             $this->log->warning('Hydro Raindrop: MFA Session time-out detected, redirecting to sign on page.');
-            $this->mfaSession->setFlashMessage('Session timed out, please sign in again.');
+
+            $message = 'Session timed out, please sign in again.';
+
+            if ($isBackend) {
+                /** @var FlashBag $flashBag */
+                $flashBag = resolve(FlashBag::class);
+                $flashBag->info($message);
+            } else {
+                $this->mfaSession->setFlashMessage($message);
+            }
+
             $this->mfaSession->destroy();
 
             if ($request->ajax()) {
                 return response()->json([
-                    'X_OCTOBER_REDIRECT' => $urlHelper->getSignOnResponse()->getTargetUrl(),
+                    'X_OCTOBER_REDIRECT' => $urlHelper->getSignOnResponse($isBackend)->getTargetUrl(),
                 ]);
             }
 
-            return $urlHelper->getSignOnResponse();
+            return $urlHelper->getSignOnResponse($isBackend);
         }
 
         $mfaUser = MfaUser::createFromSession();
