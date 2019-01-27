@@ -1,0 +1,53 @@
+{% spaceless %}
+    <div id="hydro-container" class="hydro-mfa">
+        <form method="post"
+              data-request="{{ __SELF__ ~ '::onAuthenticate' }}"
+              data-request-validate
+              data-request-flash>
+            <div class="hydro-header">
+                <div class="logo">
+                    <a href="/">
+                        <img src="{{ app_logo }}" alt="{{ app_name }} - {{ app_tagline }}">
+                    </a>
+                </div>
+                <h1>{{ 'Hydro MFA'|_ }}</h1>
+            </div>
+            <div class="hydro-body">
+                <div class="item full">
+                    <img src="/plugins/hydrocommunity/raindrop/assets/images/input-message.png"
+                         class="hydro-illustration"
+                         alt="{{ 'Enter Code in the Hydro App'|_ }}">
+                    <label>{{ 'Enter Security Code into the Hydro App'|_ }}</label>
+                    <div class="hydro-digits" id="hydroDigits">
+                        {% partial __SELF__ ~ '::_message' %}
+                    </div>
+                    <div class="validation-message" data-validate-for="hydro-digits"></div>
+                    <div id="hydroFlash">
+                        {% component 'hydroCommunityHydroFlash' %}
+                    </div>
+                </div>
+                <div class="item actions">
+                    <input type="button"
+                           data-request="{{ __SELF__ ~ '::onCancel' }}"
+                           class="secondary"
+                           value="{{ 'Cancel'|_ }}"
+                           data-attach-loading>
+                </div>
+            </div>
+            <div class="hydro-footer">
+                <div class="hydro-submission">
+                    <input type="submit"
+                           class="btn primary"
+                           value="{{ 'Authenticate'|_ }}"
+                           data-attach-loading>
+                </div>
+                <div class="hydro-abt-us">
+                    <a href="https://www.hydrogenplatform.com/" target="_blank" title="{{ 'This website is powered by Hydro - Blockchain based multi factor authentication, visit us to know more'|_ }}">
+                        <label>{{ 'Powered by'|_ }}</label>
+                        <img src="https://www.hydrogenplatform.com/images/logo_hydro.svg" alt="Hydro">
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endspaceless %}

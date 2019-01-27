@@ -1,0 +1,4 @@
+1.0.0:
+    - First version of HydroCommunity.Raindrop
+    - 100_0001_create_users_meta_table.php
+    - 100_0002_create_backend_users_meta_table.php

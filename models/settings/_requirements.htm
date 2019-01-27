@@ -1,0 +1,43 @@
+<?php
+
+declare(strict_types = 1);
+
+use \HydroCommunity\Raindrop\Classes\RequirementChecker;
+
+$checker = new RequirementChecker();
+
+?>
+<table class="table">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Passes</th>
+        <th>Requirement</th>
+    </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($checker->getRequirements() as $result): ?>
+        <?php $passes = $checker->check($result['test']); ?>
+        <tr>
+            <td class="<?= $passes ? 'text-success' : 'text-danger' ?>"><?php echo e($result['label']); ?></td>
+            <td>
+                <?php if ($passes): ?>
+                    <i class="icon icon-check text-success"></i>
+                <?php else: ?>
+                    <i class="icon icon-times text-danger"></i>
+                <?php endif; ?>
+            </td>
+            <td>
+                <?php echo e($result['requirement']); ?>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
+
+<?php if (!$checker->passes()): ?>
+    <div class="text-danger">
+        <i class="icon icon-warning"></i>
+        Not all requirements are met. Please fix the issues and come back to configure the Hydro Raindrop plugin.
+    </div>
+<?php endif; ?>
