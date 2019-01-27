@@ -173,7 +173,7 @@ class HydroMfa extends HydroComponentBase
             $authManager->login($user, false);
         }
 
-        if (Settings::get('mfa_method') !== Settings::MFA_METHOD_ENFORCED
+        if (Settings::get('mfa_method', Settings::MFA_METHOD_PROMPTED) !== Settings::MFA_METHOD_ENFORCED
             && $this->mfaSession->isActionDisable()
         ) {
             $hydroId = $this->userHelper->getHydroId();

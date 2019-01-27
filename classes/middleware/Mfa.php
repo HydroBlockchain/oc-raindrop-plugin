@@ -43,9 +43,10 @@ class Mfa extends BaseMiddleware
          */
         $authManager = AuthManager::instance();
         $isAuthenticated = $authManager->check();
+        $mfaMethod = Settings::get('mfa_method', Settings::MFA_METHOD_PROMPTED);
 
         if ($path === 'hydro-raindrop/disable') {
-            if (!$isAuthenticated || Settings::get('mfa_method') === Settings::MFA_METHOD_ENFORCED) {
+            if (!$isAuthenticated || $mfaMethod === Settings::MFA_METHOD_ENFORCED) {
                 $this->log->warning(
                     'Hydro Raindrop: Disabling request for Hydro Raindrop is not allowed. '
                     . 'User must be signed in and MFA method must be optional or prompted.'
@@ -57,7 +58,7 @@ class Mfa extends BaseMiddleware
         }
 
         if ($path === 'hydro-raindrop/enable') {
-            if (!$isAuthenticated || Settings::get('mfa_method') === Settings::MFA_METHOD_ENFORCED) {
+            if (!$isAuthenticated || $mfaMethod === Settings::MFA_METHOD_ENFORCED) {
                 $this->log->warning(
                     'Hydro Raindrop: Enabling request for Hydro Raindrop is not allowed. '
                     . 'User must be signed in and MFA method must be optional or prompted.'
