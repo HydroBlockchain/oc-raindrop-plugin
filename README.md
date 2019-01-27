@@ -68,14 +68,8 @@ Execute the following commands from CLI (make sure your current working director
 
 Create the necessary pages in the `pages` folder of your theme for this plugin to work.
 
-#### Novice
-
-[TODO]
-
-#### Advanced
-
 - Create a folder `hydro` in `themes/[yourtheme]/pages`
-- Create the file `mfa.html` in `themes/[yourtheme]/pages/hydro` and it must contain at least the following code:
+- Create the file `mfa.htm` in `themes/[yourtheme]/pages/hydro` and it must contain at least the following code:
 
 ```
 title = "Hydro Raindrop MFA"
@@ -88,7 +82,7 @@ is_hidden = 0
 {% component 'hydroCommunityHydroMfa' %}
 ```
 
-- Create the file `setup.html` in `themes/[yourtheme]/pages/hydro` and it must contain at least the following code:
+- Create the file `setup.htm` in `themes/[yourtheme]/pages/hydro` and it must contain at least the following code:
 ```
 title = "Hydro Raindrop Setup"
 url = "/hydro-raindrop/setup"
@@ -98,4 +92,19 @@ is_hidden = 0
 [hydroCommunityHydroSetup]
 ==
 {% component 'hydroCommunityHydroSetup' %}
+```
+
+- Create a login page (if you haven't already), for example `login.htm`. 
+```
+title = "Login"
+url = "/login"
+layout = "default"
+is_hidden = 0
+
+[account]
+redirect = "home"
+paramCode = "code"
+forceSecure = 1
+==
+{% component 'account' %}
 ```
