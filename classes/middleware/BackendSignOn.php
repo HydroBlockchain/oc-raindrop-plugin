@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace HydroCommunity\Raindrop\Classes\Middleware;
 
 use Backend\Classes\AuthManager;
-use Backend\Helpers\Cms as BackendHelper;
+use Backend\Helpers\Backend as BackendHelper;
 use Backend\Models\User;
 use Closure;
 use Cms\Helpers\Cms;
@@ -37,7 +37,6 @@ class BackendSignOn
 
     /**
      * @param Cms $cmsHelper
-     * @param Request $request
      * @param LoggerInterface $log
      */
     public function __construct(CmsHelper $cmsHelper, LoggerInterface $log)

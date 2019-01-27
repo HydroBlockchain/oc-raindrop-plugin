@@ -68,8 +68,8 @@ final class UrlHelper
     public function getSignOnResponse(bool $backend = null): RedirectResponse
     {
         if ($backend) {
-            /** @var \Backend\Helpers\Cms $helper */
-            $helper = resolve(\Backend\Helpers\Cms::class);
+            /** @var \Backend\Helpers\Backend $helper */
+            $helper = resolve(\Backend\Helpers\Backend::class);
             return redirect()->to($helper->url('backend/auth/signin'));
         }
 
@@ -90,8 +90,8 @@ final class UrlHelper
     public function getRedirectResponse(bool $backend): RedirectResponse
     {
         if ($backend) {
-            /** @var \Backend\Helpers\Cms $helper */
-            $helper = resolve(\Backend\Helpers\Cms::class);
+            /** @var \Backend\Helpers\Backend $helper */
+            $helper = resolve(\Backend\Helpers\Backend::class);
             return redirect()->to($helper->url());
         }
 
