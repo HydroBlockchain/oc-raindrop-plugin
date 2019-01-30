@@ -12,6 +12,7 @@ use HydroCommunity\Raindrop\Classes\Exceptions\MessageNotFoundInSessionStorage;
 use HydroCommunity\Raindrop\Classes\Exceptions\UserIdNotFoundInSessionStorage;
 use HydroCommunity\Raindrop\Classes\MfaUser;
 use HydroCommunity\Raindrop\Classes\Helpers\UrlHelper;
+use HydroCommunity\Raindrop\Classes\ReauthenticateSession;
 use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\RedirectResponse;
 use RainLab\User\Classes\AuthManager as FrontEndAuthManager;
@@ -173,6 +174,9 @@ class HydroMfa extends HydroComponentBase
             $authManager->login($user, false);
         }
 
+        /*
+         * Unregister User
+         */
         if (Settings::get('mfa_method', Settings::MFA_METHOD_PROMPTED) !== Settings::MFA_METHOD_ENFORCED
             && $this->mfaSession->isActionDisable()
         ) {
@@ -191,6 +195,21 @@ class HydroMfa extends HydroComponentBase
             } catch (UnregisterUserFailed $e) {
                 $this->log->error('Hydro Raindrop: ' . $e->getMessage());
             }
+        }
+
+        /*
+         * Reauthenticate
+         */
+        if ($this->mfaSession->isActionReauthenticate()) {
+            (new ReauthenticateSession())->addPage(
+                $this->mfaSession->getActionParameters()['identifier']
+            );
+
+            $redirect = $this->mfaSession->getActionParameters()['redirect'];
+
+            $this->mfaSession->destroy();
+
+            return redirect()->to($redirect);
         }
 
         $isBackend = $this->mfaSession->isBackend();

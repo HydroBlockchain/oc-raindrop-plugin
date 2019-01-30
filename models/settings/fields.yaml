@@ -90,4 +90,10 @@ tabs:
             span: left
             type: number
             comment: "The user account will be blocked if the number of attempts exceeds this value."
-
+        mfa_lifetime_reauthentication:
+            label: "Lifetime (in seconds) for reauthentication (3600 = 1 hour)"
+            tab: "Customization"
+            span: left
+            type: number
+            default: 3600
+            comment: "To add an extra layer of security, developers can require Users to perform MFA before viewing a page. The lifetime indicates how long the page will be accessible. If the lifetime expires, Users need to perform MFA again to view the page."

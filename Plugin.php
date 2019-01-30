@@ -72,6 +72,7 @@ class Plugin extends PluginBase
             Components\HydroMfa::class => 'hydroCommunityHydroMfa',
             Components\HydroSetup::class => 'hydroCommunityHydroSetup',
             Components\HydroFlash::class => 'hydroCommunityHydroFlash',
+            Components\HydroReauthenticate::class => 'hydroCommunityHydroReauthenticate',
         ];
     }
 

@@ -23,6 +23,7 @@ final class MfaSession
     private const KEY_BACKEND = 'hydro_community_raindrop_backend';
     private const KEY_USER = 'hydro_community_raindrop_user';
     private const KEY_ACTION = 'hydro_community_raindrop_action';
+    private const KEY_ACTION_PARAMETERS = 'hydro_community_raindrop_action_parameters';
     private const KEY_MESSAGE = 'hydro_community_raindrop_message';
     private const KEY_TIME = 'hydro_community_raindrop_time';
     private const KEY_FLASH_MESSAGE = 'hydro_community_raindrop_flash_message';
@@ -30,6 +31,7 @@ final class MfaSession
     public const ACTION_ENABLE = 'enable';
     public const ACTION_VERIFY = 'verify';
     public const ACTION_DISABLE = 'disable';
+    public const ACTION_REAUTHENTICATE = 'reauthenticate';
 
     /**
      * Session lifetime in seconds.
@@ -152,12 +154,30 @@ final class MfaSession
     }
 
     /**
+     * @return bool
+     */
+    public function isActionReauthenticate(): bool
+    {
+        return $this->store->get(self::KEY_ACTION) === self::ACTION_REAUTHENTICATE;
+    }
+
+    /**
+     * @return array
+     */
+    public function getActionParameters(): array
+    {
+        return $this->store->get(self::KEY_ACTION_PARAMETERS, []);
+    }
+
+    /**
      * @param string $action
+     * @param array $parameters
      * @return MfaSession
      */
-    public function setAction(string $action): MfaSession
+    public function setAction(string $action, array $parameters = []): MfaSession
     {
         $this->store->put(self::KEY_ACTION, $action);
+        $this->store->put(self::KEY_ACTION_PARAMETERS, $parameters);
         return $this;
     }
 
@@ -175,6 +195,7 @@ final class MfaSession
     public function forgetAction(): MfaSession
     {
         $this->store->forget(self::KEY_ACTION);
+        $this->store->forget(self::KEY_ACTION_PARAMETERS);
         return $this;
     }
 
