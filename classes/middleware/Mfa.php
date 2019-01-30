@@ -11,9 +11,10 @@ use HydroCommunity\Raindrop\Classes\Helpers\UrlHelper;
 use HydroCommunity\Raindrop\Classes\MfaUser;
 use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\Request;
+use October\Rain\Auth\Models\User;
 use October\Rain\Flash\FlashBag;
-use RainLab\User\Classes\AuthManager;
-use RainLab\User\Models\User;
+use RainLab\User\Classes\AuthManager as FrontEndAuthManager;
+use Backend\Classes\AuthManager as BackendAuthManager;
 
 /**
  * Class MfaSetup
@@ -41,8 +42,15 @@ class Mfa extends BaseMiddleware
          * - 'Disable' will start the MFA process (in the Middleware/Mfa class).
          *   When MFA method is enforced. Disabling/Enabling MFA is not allowed.
          */
-        $authManager = AuthManager::instance();
+
+        if ($this->mfaSession->isBackend()) {
+            $authManager = BackendAuthManager::instance();
+        } else {
+            $authManager = FrontEndAuthManager::instance();
+        }
+
         $isAuthenticated = $authManager->check();
+
         $mfaMethod = Settings::get('mfa_method', Settings::MFA_METHOD_PROMPTED);
 
         if ($path === 'hydro-raindrop/disable') {
@@ -55,6 +63,7 @@ class Mfa extends BaseMiddleware
             }
 
             $this->disable($authManager->getUser());
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.disabled-mfa', [$authManager->getUser()]);
         }
 
         if ($path === 'hydro-raindrop/enable') {
@@ -66,6 +75,7 @@ class Mfa extends BaseMiddleware
             }
 
             $this->enable($authManager->getUser());
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.enabled-mfa', [$authManager->getUser()]);
         }
 
         if (!$this->mfaSession->isStarted()) {
@@ -90,6 +100,8 @@ class Mfa extends BaseMiddleware
             }
 
             $this->mfaSession->destroy();
+
+            $this->dispatcher->fire('hydrocommunity.raindrop.session-timed-out');
 
             if ($request->ajax()) {
                 return response()->json([
@@ -138,10 +150,8 @@ class Mfa extends BaseMiddleware
      */
     private function enable(User $user): void
     {
-        // TODO: parameter backend true/false
-
         $mfaSession = new MfaSession();
-        $mfaSession->start(false, $user->getKey())
+        $mfaSession->start($this->mfaSession->isBackend(), $user->getKey())
             ->setAction(MfaSession::ACTION_ENABLE)
             ->setFlashMessage('Enter the security code into the Hydro app to enable Hydro Raindrop MFA.');
     }
@@ -151,10 +161,8 @@ class Mfa extends BaseMiddleware
      */
     private function disable(User $user): void
     {
-        // TODO: parameter backend true/false
-
         $mfaSession = new MfaSession();
-        $mfaSession->start(false, $user->getKey())
+        $mfaSession->start($this->mfaSession->isBackend(), $user->getKey())
             ->setAction(MfaSession::ACTION_DISABLE)
             ->setFlashMessage('Enter the security code into the Hydro app to disable Hydro Raindrop MFA.');
     }

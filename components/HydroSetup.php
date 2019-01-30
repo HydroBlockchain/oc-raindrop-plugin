@@ -128,7 +128,7 @@ class HydroSetup extends HydroComponentBase
                 FrontendAuthManager::instance()->login($user, false);
             }
 
-            return (new UrlHelper())->getRedirectResponse($isBackend);
+            return (new UrlHelper())->getRedirectResponse($isBackend, false);
         }
 
         return (new UrlHelper())->getSignOnResponse($isBackend);

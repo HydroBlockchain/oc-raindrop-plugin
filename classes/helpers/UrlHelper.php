@@ -70,7 +70,7 @@ final class UrlHelper
         if ($backend) {
             /** @var \Backend\Helpers\Backend $helper */
             $helper = resolve(\Backend\Helpers\Backend::class);
-            return redirect()->to($helper->url('backend/auth/signin'));
+            return $helper->redirect('backend/auth/signin'); // TODO: Check
         }
 
         $page = Settings::get('page_sign_on');
@@ -85,14 +85,20 @@ final class UrlHelper
 
     /**
      * @param bool $backend
+     * @param bool $isActionVerifyOrDisable
      * @return RedirectResponse
      */
-    public function getRedirectResponse(bool $backend): RedirectResponse
+    public function getRedirectResponse(bool $backend, bool $isActionVerifyOrDisable): RedirectResponse
     {
         if ($backend) {
             /** @var \Backend\Helpers\Backend $helper */
             $helper = resolve(\Backend\Helpers\Backend::class);
-            return redirect()->to($helper->url());
+
+            if ($isActionVerifyOrDisable) {
+                return $helper->redirectIntended('backend/users/myaccount');
+            }
+
+            return $helper->redirect('backend');
         }
 
         $page = Settings::get('page_redirect');

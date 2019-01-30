@@ -1,0 +1,14 @@
+<?php
+
+$user = $this->formGetModel();
+
+$isMfaEnabled = $user->meta->is_mfa_enabled;
+
+?>
+<?php if ($isMfaEnabled): ?>
+    <p class="text-success">Multi Factor Authentication is enabled for your account.</p>
+    <button class="btn btn-sm btn-danger" data-request="onDisableHydroRaindropMfa">Disable MFA</button>
+<?php else: ?>
+    <p class="text-danger">Multi Factor Authentication is not enabled for your account.</p>
+    <button class="btn btn-sm btn-success" data-request="onEnableHydroRaindropMfa">Enable MFA</button>
+<?php endif;?>

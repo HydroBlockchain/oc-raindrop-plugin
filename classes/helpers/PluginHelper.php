@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop\Classes\Helpers;
 
-use Backend\Classes\BackendController;
-use Backend\Controllers\Auth;
-use Backend\Models\User as BackEndUser;
+use Backend\Classes\AuthManager as BackendAuthManager;
+use Backend\Controllers\Users as BackendUserController;
+use Backend\Models\User as BackendUser;
+use HydroCommunity\Raindrop\Classes\MfaSession;
 use HydroCommunity\Raindrop\Classes\Middleware;
 use HydroCommunity\Raindrop\Models;
 use Illuminate\Contracts\Http\Kernel;
@@ -103,7 +104,7 @@ final class PluginHelper
      */
     public function extendBackendUser(): self
     {
-        BackEndUser::extend(function (BackEndUser $model) {
+        BackendUser::extend(function (BackendUser $model) {
             $model->hasOne['meta'] = [
                 Models\BackendUserMeta::class,
                 'key' => 'user_id',
@@ -116,6 +117,20 @@ final class PluginHelper
                         'user_id' => $model->getKey(),
                     ]);
                 }
+            });
+        });
+
+        BackendUserController::extend(function (BackendUserController $controller) {
+            $controller->addDynamicMethod('onEnableHydroRaindropMfa', function () {
+                (new MfaSession())->start(true, BackendAuthManager::instance()->getUser()->getKey());
+
+                return response()->redirectTo('/hydro-raindrop/enable');
+            });
+
+            $controller->addDynamicMethod('onDisableHydroRaindropMfa', function () {
+                (new MfaSession())->start(true, BackendAuthManager::instance()->getUser()->getKey());
+
+                return response()->redirectTo('/hydro-raindrop/disable');
             });
         });
 

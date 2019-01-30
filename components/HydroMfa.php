@@ -194,10 +194,23 @@ class HydroMfa extends HydroComponentBase
         }
 
         $isBackend = $this->mfaSession->isBackend();
+        $isActionVerify = $this->mfaSession->isActionVerify();
+        $isActionDisable = $this->mfaSession->isActionDisable();
+
+        if ($isBackend && $isActionVerify) {
+            $this->flash->success('Hydro Raindrop MFA successfully enabled!');
+        }
+
+        if ($isBackend && $isActionDisable) {
+            $this->flash->success('Hydro Raindrop MFA successfully disabled!');
+        }
 
         $this->mfaSession->destroy();
 
-        return $this->urlHelper->getRedirectResponse($isBackend);
+        return $this->urlHelper->getRedirectResponse(
+            $isBackend,
+            $isActionVerify || $isActionDisable
+        );
     }
 
     /**

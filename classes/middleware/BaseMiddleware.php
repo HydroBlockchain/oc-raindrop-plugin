@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace HydroCommunity\Raindrop\Classes\Middleware;
 
 use HydroCommunity\Raindrop\Classes\MfaSession;
+use October\Rain\Events\Dispatcher;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,11 +26,18 @@ abstract class BaseMiddleware
     protected $mfaSession;
 
     /**
-     * @param LoggerInterface $log
+     * @var Dispatcher
      */
-    public function __construct(LoggerInterface $log)
+    protected $dispatcher;
+
+    /**
+     * @param LoggerInterface $log
+     * @param Dispatcher $dispatcher
+     */
+    public function __construct(LoggerInterface $log, Dispatcher $dispatcher)
     {
         $this->log = $log;
         $this->mfaSession = new MfaSession();
+        $this->dispatcher = $dispatcher;
     }
 }
