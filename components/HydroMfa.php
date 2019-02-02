@@ -164,8 +164,10 @@ class HydroMfa extends HydroComponentBase
     {
         if ($this->mfaSession->isBackend()) {
             $authManager = BackendAuthManager::instance();
+            $method = Settings::get('mfa_method_backend', Settings::MFA_METHOD_PROMPTED);
         } else {
             $authManager = FrontEndAuthManager::instance();
+            $method = Settings::get('mfa_method', Settings::MFA_METHOD_PROMPTED);
         }
 
         $user = $this->userHelper->getUserModel();
@@ -177,9 +179,7 @@ class HydroMfa extends HydroComponentBase
         /*
          * Unregister User
          */
-        if (Settings::get('mfa_method', Settings::MFA_METHOD_PROMPTED) !== Settings::MFA_METHOD_ENFORCED
-            && $this->mfaSession->isActionDisable()
-        ) {
+        if ($method !== Settings::MFA_METHOD_ENFORCED && $this->mfaSession->isActionDisable()) {
             $hydroId = $this->userHelper->getHydroId();
 
             try {
@@ -250,8 +250,15 @@ class HydroMfa extends HydroComponentBase
             'mfa_failed_attempts' => ++$failedAttempts,
         ]);
 
-        $maximumAttempts = (int) Settings::get('mfa_maximum_attempts', 0);
+        if ($this->mfaSession->isBackend()) {
+            $maximumAttempts = (int) Settings::get('mfa_maximum_attempts_backend', 0);
+        } else {
+            $maximumAttempts = (int) Settings::get('mfa_maximum_attempts', 0);
+        }
 
+        /*
+         * Maximum failed attempts exceeded.
+         */
         if ($maximumAttempts > 0 && $failedAttempts > $maximumAttempts) {
             $user->meta()->update([
                 'is_blocked' => true,

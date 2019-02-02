@@ -101,7 +101,17 @@ class MfaUser
             return false;
         }
 
-        $method = Models\Settings::get('mfa_method', Models\Settings::MFA_METHOD_PROMPTED);
+        if ($this->mfaSession->isBackend()) {
+            $method = Models\Settings::get(
+                'mfa_method_backend',
+                Models\Settings::MFA_METHOD_PROMPTED
+            );
+        } else {
+            $method = Models\Settings::get(
+                'mfa_method',
+                Models\Settings::MFA_METHOD_PROMPTED
+            );
+        }
 
         switch ($method) {
             case Models\Settings::MFA_METHOD_OPTIONAL:
