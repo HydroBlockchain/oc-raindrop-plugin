@@ -24,6 +24,7 @@ Welcome to the Hydro Raindrop October CMS plugin repository on GitHub.
 - PHP 7.1 or higher
 - `RainLab.User` plugin installed and configured
 - `RainLab.Translate` plugin installed and configured
+- `HydroRaindropDemo` theme (optional) 
 
 ## Installation
 
@@ -64,47 +65,17 @@ Execute the following commands from CLI (make sure your current working director
 5. Enter your `Application ID`, `Client ID` and `Client Secret` in the `API Settings` tab.
 6. Make some adjustments for your project in the `Customization` tab.
 
-### 2. Create pages
+### 2. Implementation into your theme.
 
-Create the necessary pages in the `pages` folder of your theme for this plugin to work.
+Install the `HydroRaindropDemo` theme which includes an example implementation of Hydro Raindrop MFA.
 
-- Create a folder `hydro` in `themes/[yourtheme]/pages`
-- Create the file `mfa.htm` in `themes/[yourtheme]/pages/hydro` and it must contain at least the following code:
+## Events
 
-```
-title = "Hydro Raindrop MFA"
-url = "/hydro-raindrop/mfa"
-layout = "default"
-is_hidden = 0
-
-[hydroCommunityHydroMfa]
-==
-{% component 'hydroCommunityHydroMfa' %}
-```
-
-- Create the file `setup.htm` in `themes/[yourtheme]/pages/hydro` and it must contain at least the following code:
-```
-title = "Hydro Raindrop Setup"
-url = "/hydro-raindrop/setup"
-layout = "default"
-is_hidden = 0
-
-[hydroCommunityHydroSetup]
-==
-{% component 'hydroCommunityHydroSetup' %}
-```
-
-- Create a login page (if you haven't already), for example `login.htm`. 
-```
-title = "Login"
-url = "/login"
-layout = "default"
-is_hidden = 0
-
-[account]
-redirect = "home"
-paramCode = "code"
-forceSecure = 1
-==
-{% component 'account' %}
-```
+| Event | Payload | Description
+|---|---|---|
+| `hydrocommunity.raindrop.user.mfa.enabled` | `User` | Fired when user successfully enabled MFA on their account. |
+| `hydrocommunity.raindrop.user.mfa.disabled` | `User` | Fired when user has disabled MFA on their account. |
+| `hydrocommunity.raindrop.user.mfa.setup-required` | `User` | Fired when user needs to set up their HydroID. |
+| `hydrocommunity.raindrop.user.mfa.required` | `User` | Fired when user needs to perform MFA. |
+| `hydrocommunity.raindrop.user.blocked` | `User` | Fired after a user is blocked due to many failed MFA attempts. |
+| `hydrocommunity.raindrop.mfa.session-timed-out` | `User` | Fired after the MFA session has been timed out. |
