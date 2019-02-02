@@ -54,7 +54,6 @@ class FrontendSignOn extends BaseMiddleware
         $userHelper = new MfaUser($user);
 
         if ($userHelper->isBlocked()) {
-            $this->dispatcher->fire('hydrocommunity.raindrop.frontend-user.blocked', [$user]);
             throw new AuthException(trans('hydrocommunity.raindrop::lang.account.blocked'));
         }
 
@@ -64,7 +63,7 @@ class FrontendSignOn extends BaseMiddleware
          * Set up of Hydro Raindrop MFA is required.
          */
         if ($userHelper->requiresMfaSetup()) {
-            $this->dispatcher->fire('hydrocommunity.raindrop.frontend-user.requires-mfa-setup', [$user]);
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.mfa.setup-required', [$user]);
             $this->log->info('User authenticates and requires Hydro Raindrop MFA Setup.');
             $redirectUri = UrlHelper::URL_SETUP;
         }
@@ -73,7 +72,7 @@ class FrontendSignOn extends BaseMiddleware
          * Hydro Raindrop MFA is required to proceed.
          */
         if ($userHelper->requiresMfa()) {
-            $this->dispatcher->fire('hydrocommunity.raindrop.frontend-user.requires-mfa', [$user]);
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.mfa.required', [$user]);
             $this->log->info('User authenticates and requires Hydro Raindrop MFA.');
             $redirectUri = UrlHelper::URL_MFA;
         }

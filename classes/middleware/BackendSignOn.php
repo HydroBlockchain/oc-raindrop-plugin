@@ -113,7 +113,6 @@ class BackendSignOn
         $userHelper = new MfaUser($user);
 
         if ($userHelper->isBlocked()) {
-            $this->dispatcher->fire('hydrocommunity.raindrop.backend-user.blocked', [$user]);
             return redirect()->to($this->backendHelper->url('backend/auth/signin') . '?blocked=1');
         }
 
@@ -123,7 +122,7 @@ class BackendSignOn
          * Set up of Hydro Raindrop MFA is required.
          */
         if ($userHelper->requiresMfaSetup()) {
-            $this->dispatcher->fire('hydrocommunity.raindrop.backend-user.requires-mfa-setup', [$user]);
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.mfa.setup-required', [$user]);
             $this->log->info('Backend user authenticates and requires Hydro Raindrop MFA Setup.');
             $redirectUri = UrlHelper::URL_SETUP;
         }
@@ -132,7 +131,7 @@ class BackendSignOn
          * Hydro Raindrop MFA is required to proceed.
          */
         if ($userHelper->requiresMfa()) {
-            $this->dispatcher->fire('hydrocommunity.raindrop.backend-user.requires-mfa', [$user]);
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.mfa.required', [$user]);
             $this->log->info('Backend user authenticates and requires Hydro Raindrop MFA.');
             $redirectUri = UrlHelper::URL_MFA;
         }

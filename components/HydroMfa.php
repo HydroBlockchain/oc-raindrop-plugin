@@ -15,6 +15,7 @@ use HydroCommunity\Raindrop\Classes\Helpers\UrlHelper;
 use HydroCommunity\Raindrop\Classes\ReauthenticateSession;
 use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\RedirectResponse;
+use October\Rain\Events\Dispatcher;
 use RainLab\User\Classes\AuthManager as FrontEndAuthManager;
 use Backend\Classes\AuthManager as BackendAuthManager;
 
@@ -34,6 +35,11 @@ class HydroMfa extends HydroComponentBase
      * @var string
      */
     public $message;
+
+    /**
+     * @var Dispatcher
+     */
+    private $dispatcher;
 
     /**
      * {@inheritdoc}
@@ -78,6 +84,7 @@ class HydroMfa extends HydroComponentBase
         }
 
         $this->message = $this->mfaSession->getMessage();
+        $this->dispatcher = resolve(Dispatcher::class);
     }
 
     /**
@@ -217,10 +224,12 @@ class HydroMfa extends HydroComponentBase
         $isActionDisable = $this->mfaSession->isActionDisable();
 
         if ($isBackend && $isActionVerify) {
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.mfa.enabled', [$user]);
             $this->flash->success('Hydro Raindrop MFA successfully enabled!');
         }
 
         if ($isBackend && $isActionDisable) {
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.mfa.disabled', [$user]);
             $this->flash->success('Hydro Raindrop MFA successfully disabled!');
         }
 
@@ -272,6 +281,8 @@ class HydroMfa extends HydroComponentBase
 
             $this->mfaSession->setFlashMessage(e(trans('hydrocommunity.raindrop::lang.account.blocked')));
             $this->mfaSession->destroy();
+
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.blocked', [$user]);
 
             return (new UrlHelper())->getSignOnResponse($isBackend, true);
         }

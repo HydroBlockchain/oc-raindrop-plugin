@@ -63,7 +63,6 @@ class Mfa extends BaseMiddleware
             }
 
             $this->disable($authManager->getUser());
-            $this->dispatcher->fire('hydrocommunity.raindrop.user.disabled-mfa', [$authManager->getUser()]);
         }
 
         if ($path === 'hydro-raindrop/enable') {
@@ -75,7 +74,6 @@ class Mfa extends BaseMiddleware
             }
 
             $this->enable($authManager->getUser());
-            $this->dispatcher->fire('hydrocommunity.raindrop.user.enabled-mfa', [$authManager->getUser()]);
         }
 
         if (!$this->mfaSession->isStarted()) {
@@ -101,7 +99,7 @@ class Mfa extends BaseMiddleware
 
             $this->mfaSession->destroy();
 
-            $this->dispatcher->fire('hydrocommunity.raindrop.session-timed-out');
+            $this->dispatcher->fire('hydrocommunity.raindrop.mfa.session-timed-out');
 
             if ($request->ajax()) {
                 return response()->json([
