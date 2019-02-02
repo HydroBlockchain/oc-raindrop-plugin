@@ -63,14 +63,15 @@ final class UrlHelper
 
     /**
      * @param bool $backend
+     * @param bool $blocked
      * @return RedirectResponse
      */
-    public function getSignOnResponse(bool $backend = null): RedirectResponse
+    public function getSignOnResponse(bool $backend, bool $blocked = false): RedirectResponse
     {
         if ($backend) {
             /** @var \Backend\Helpers\Backend $helper */
             $helper = resolve(\Backend\Helpers\Backend::class);
-            return $helper->redirect('backend/auth/signin'); // TODO: Check
+            return $helper->redirect('backend/auth/signin' . ($blocked ? '?blocked=1' : ''));
         }
 
         $page = Settings::get('page_sign_on');
@@ -80,7 +81,7 @@ final class UrlHelper
             $url = Page::url($page);
         }
 
-        return redirect()->to($url);
+        return redirect()->to($url . ($blocked ? '?blocked=1' : ''));
     }
 
     /**

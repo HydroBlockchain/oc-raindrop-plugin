@@ -58,7 +58,7 @@ final class PluginHelper
             $kernel = resolve(Kernel::class);
             $kernel->prependMiddleware(Middleware\Mfa::class)
                 ->prependMiddleware(Middleware\BackendSignOn::class)
-                ->prependMiddleware(Middleware\SignOn::class)
+                ->prependMiddleware(Middleware\FrontendSignOn::class)
                 ->prependMiddleware(StartSession::class); // Make sure the session is available.
         }
 

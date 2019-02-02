@@ -14,11 +14,11 @@ use RainLab\User\Models\User;
 use Throwable;
 
 /**
- * Class SignOnMiddleware
+ * Class FrontendSignOn
  *
  * @package HydroCommunity\Raindrop\Classes\Middleware
  */
-class SignOn extends BaseMiddleware
+class FrontendSignOn extends BaseMiddleware
 {
     /**
      * Intercept the Sign-on request (if applicable).
@@ -55,7 +55,7 @@ class SignOn extends BaseMiddleware
 
         if ($userHelper->isBlocked()) {
             $this->dispatcher->fire('hydrocommunity.raindrop.frontend-user.blocked', [$user]);
-            throw new AuthException(trans('Your account has been blocked.'));
+            throw new AuthException(trans('hydrocommunity.raindrop::lang.account.blocked'));
         }
 
         $this->mfaSession->start(false, $user->getKey());

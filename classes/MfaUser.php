@@ -72,6 +72,8 @@ class MfaUser
     }
 
     /**
+     * Whether MFA is required for this user.
+     *
      * @return bool
      */
     public function requiresMfa(): bool
@@ -89,6 +91,8 @@ class MfaUser
     }
 
     /**
+     * Whether MFA Setup is required for this user.
+     *
      * @return bool
      */
     public function requiresMfaSetup(): bool

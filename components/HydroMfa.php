@@ -239,11 +239,14 @@ class HydroMfa extends HydroComponentBase
      */
     private function handleMfaFailure()
     {
-        $this->mfaSession->setFlashMessage('Authentication failed, please try again.');
+        $this->mfaSession->setFlashMessage(e(trans('hydrocommunity.raindrop::lang.authentication.failed')));
         $this->mfaSession->forgetMessage();
 
         $user = $this->userHelper->getUserModel();
 
+        /*
+         * Keep track of the failed attempts.
+         */
         $failedAttempts = $user->meta->getAttribute('mfa_failed_attempts');
 
         $user->meta()->update([
@@ -267,10 +270,10 @@ class HydroMfa extends HydroComponentBase
 
             $isBackend = $this->mfaSession->isBackend();
 
-            $this->mfaSession->setFlashMessage('Your account has been blocked.');
+            $this->mfaSession->setFlashMessage(e(trans('hydrocommunity.raindrop::lang.account.blocked')));
             $this->mfaSession->destroy();
 
-            return (new UrlHelper())->getSignOnResponse($isBackend);
+            return (new UrlHelper())->getSignOnResponse($isBackend, true);
         }
 
         $this->prepareVars();
