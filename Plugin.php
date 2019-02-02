@@ -107,6 +107,20 @@ class Plugin extends PluginBase
 
     /** @noinspection PhpMissingParentCallCommonInspection */
     /** @noinspection PhpMissingDocCommentInspection */
+    public function registerMarkupTags(): array
+    {
+        return [
+            'functions' => [
+                'isHydroRaindropMfaMethodEnforced' => function () {
+                    $mfaMethod =  Models\Settings::get('mfa_method', Models\Settings::MFA_METHOD_PROMPTED);
+                    return $mfaMethod === Models\Settings::MFA_METHOD_ENFORCED;
+                }
+            ]
+        ];
+    }
+
+    /** @noinspection PhpMissingParentCallCommonInspection */
+    /** @noinspection PhpMissingDocCommentInspection */
     public function boot()
     {
         /*
