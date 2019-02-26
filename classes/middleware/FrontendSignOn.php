@@ -14,11 +14,11 @@ use RainLab\User\Models\User;
 use Throwable;
 
 /**
- * Class SignOnMiddleware
+ * Class FrontendSignOn
  *
  * @package HydroCommunity\Raindrop\Classes\Middleware
  */
-class SignOn extends BaseMiddleware
+class FrontendSignOn extends BaseMiddleware
 {
     /**
      * Intercept the Sign-on request (if applicable).
@@ -54,7 +54,7 @@ class SignOn extends BaseMiddleware
         $userHelper = new MfaUser($user);
 
         if ($userHelper->isBlocked()) {
-            throw new AuthException(trans('Your account has been blocked.'));
+            throw new AuthException(trans('hydrocommunity.raindrop::lang.account.blocked'));
         }
 
         $this->mfaSession->start(false, $user->getKey());
@@ -63,6 +63,7 @@ class SignOn extends BaseMiddleware
          * Set up of Hydro Raindrop MFA is required.
          */
         if ($userHelper->requiresMfaSetup()) {
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.mfa.setup-required', [$user]);
             $this->log->info('User authenticates and requires Hydro Raindrop MFA Setup.');
             $redirectUri = UrlHelper::URL_SETUP;
         }
@@ -71,6 +72,7 @@ class SignOn extends BaseMiddleware
          * Hydro Raindrop MFA is required to proceed.
          */
         if ($userHelper->requiresMfa()) {
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.mfa.required', [$user]);
             $this->log->info('User authenticates and requires Hydro Raindrop MFA.');
             $redirectUri = UrlHelper::URL_MFA;
         }

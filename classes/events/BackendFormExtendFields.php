@@ -70,6 +70,9 @@ class BackendFormExtendFields
             ]);
         }
 
+        /*
+         * Add "Blocked" form field to Backend User form.
+         */
         if (get_class($form->model) === BackendUser::class
             && $form->getController() instanceof BackendUserController
         ) {
@@ -83,8 +86,27 @@ class BackendFormExtendFields
             ]);
         }
 
+        /*
+         * Add form element for enabling/disabling Hydro Raindrop MFA
+         */
+        if (get_class($form->model) === BackendUser::class
+            && $form->getController() instanceof BackendUserController
+            && $form->getContext() === 'myaccount'
+        ) {
+            $form->addTabFields([
+                '_backend_user_hydro_raindrop@myaccount' => [
+                    'tab' => 'backend::lang.user.account',
+                    'label' => 'Hydro Raindrop MFA',
+                    'span' => 'left',
+                    'type' => 'partial',
+                    'path' => '$/hydrocommunity/raindrop/views/_backend_user_hydro_raindrop.htm'
+                ]
+            ]);
+        }
+
         if ($form->model instanceof Models\Settings) {
             $requirementChecker = new RequirementChecker();
+
             if (!$requirementChecker->passes()) {
                 $form->removeTab('General');
                 $form->removeTab('API Settings');

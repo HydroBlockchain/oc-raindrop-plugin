@@ -74,8 +74,10 @@ class HydroSetup extends HydroComponentBase
      */
     protected function prepareVars(): void
     {
+        $mfaMethod = Settings::get('mfa_method', Settings::MFA_METHOD_PROMPTED);
+
         $this->userHelper = MfaUser::createFromSession();
-        $this->skipAllowed = Settings::get('mfa_method') !== Settings::MFA_METHOD_ENFORCED;
+        $this->skipAllowed = $mfaMethod !== Settings::MFA_METHOD_ENFORCED;
     }
 
     /**
@@ -115,7 +117,7 @@ class HydroSetup extends HydroComponentBase
 
         $this->mfaSession->destroy();
 
-        $mfaMethod = Settings::get('mfa_method');
+        $mfaMethod = Settings::get('mfa_method', Settings::MFA_METHOD_PROMPTED);
 
         if ($mfaMethod === Settings::MFA_METHOD_OPTIONAL
             || $mfaMethod === Settings::MFA_METHOD_PROMPTED
@@ -126,7 +128,7 @@ class HydroSetup extends HydroComponentBase
                 FrontendAuthManager::instance()->login($user, false);
             }
 
-            return (new UrlHelper())->getRedirectResponse($isBackend);
+            return (new UrlHelper())->getRedirectResponse($isBackend, false);
         }
 
         return (new UrlHelper())->getSignOnResponse($isBackend);

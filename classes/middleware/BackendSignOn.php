@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace HydroCommunity\Raindrop\Classes\Middleware;
 
 use Backend\Classes\AuthManager;
-use Backend\Helpers\Cms as BackendHelper;
+use Backend\Helpers\Backend as BackendHelper;
 use Backend\Models\User;
 use Closure;
 use Cms\Helpers\Cms;
@@ -14,7 +14,8 @@ use HydroCommunity\Raindrop\Classes\Helpers\UrlHelper;
 use HydroCommunity\Raindrop\Classes\MfaSession;
 use HydroCommunity\Raindrop\Classes\MfaUser;
 use Illuminate\Http\Request;
-use October\Rain\Auth\AuthException;
+use October\Rain\Events\Dispatcher;
+use October\Rain\Flash\FlashBag;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -31,29 +32,58 @@ class BackendSignOn
     private $cmsHelper;
 
     /**
+     * @var BackendHelper
+     */
+    private $backendHelper;
+
+    /**
      * @var LoggerInterface
      */
     protected $log;
 
     /**
-     * @param Cms $cmsHelper
-     * @param Request $request
-     * @param LoggerInterface $log
+     * @var Dispatcher
      */
-    public function __construct(CmsHelper $cmsHelper, LoggerInterface $log)
-    {
+    private $dispatcher;
+
+    /**
+     * @var FlashBag
+     */
+    private $flashBag;
+
+    /**
+     * @param Cms $cmsHelper
+     * @param BackendHelper $backendHelper
+     * @param LoggerInterface $log
+     * @param Dispatcher $dispatcher
+     * @param FlashBag $flashBag
+     */
+    public function __construct(
+        CmsHelper $cmsHelper,
+        BackendHelper $backendHelper,
+        LoggerInterface $log,
+        Dispatcher $dispatcher,
+        FlashBag $flashBag
+    ) {
         $this->cmsHelper = $cmsHelper;
+        $this->backendHelper = $backendHelper;
         $this->log = $log;
+        $this->dispatcher = $dispatcher;
+        $this->flashBag = $flashBag;
     }
 
     /**
      * @param Request $request
      * @param Closure $next
      * @return \Illuminate\Http\RedirectResponse|mixed
-     * @throws AuthException
      */
     public function handle(Request $request, Closure $next)
     {
+        if ($this->isSignOnBlockedRequest($request)) {
+            $this->flashBag->error(e(trans('hydrocommunity.raindrop::lang.account.blocked')));
+            return $next($request);
+        }
+
         if (!$this->isSignOnRequest($request)) {
             return $next($request);
         }
@@ -64,10 +94,13 @@ class BackendSignOn
             $loginName = $authManager->createUserModel()->getLoginName();
 
             /** @var User $user */
-            $user = AuthManager::instance()->findUserByCredentials([
+            $user = AuthManager::instance()->authenticate([
                 $loginName => $request->get('login'),
                 'password' => $request->get('password'),
             ]);
+
+            // Immediately logout, authentication was successful.
+            AuthManager::instance()->logout();
         } catch (Throwable $e) {
             $this->log->warning('Hydro Raindrop: Backend user could not be found with given credentials.');
             return $next($request);
@@ -80,7 +113,7 @@ class BackendSignOn
         $userHelper = new MfaUser($user);
 
         if ($userHelper->isBlocked()) {
-            throw new AuthException(trans('Your account has been blocked.'));
+            return redirect()->to($this->backendHelper->url('backend/auth/signin') . '?blocked=1');
         }
 
         $mfaSession->start(true, $user->getKey());
@@ -89,6 +122,7 @@ class BackendSignOn
          * Set up of Hydro Raindrop MFA is required.
          */
         if ($userHelper->requiresMfaSetup()) {
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.mfa.setup-required', [$user]);
             $this->log->info('Backend user authenticates and requires Hydro Raindrop MFA Setup.');
             $redirectUri = UrlHelper::URL_SETUP;
         }
@@ -97,11 +131,23 @@ class BackendSignOn
          * Hydro Raindrop MFA is required to proceed.
          */
         if ($userHelper->requiresMfa()) {
+            $this->dispatcher->fire('hydrocommunity.raindrop.user.mfa.required', [$user]);
             $this->log->info('Backend user authenticates and requires Hydro Raindrop MFA.');
             $redirectUri = UrlHelper::URL_MFA;
         }
 
         return redirect()->to($this->cmsHelper->url($redirectUri));
+    }
+
+    /**
+     * @param Request $request
+     * @return bool
+     */
+    private function isSignOnBlockedRequest(Request $request): bool
+    {
+        return $request->url() === $this->backendHelper->url('backend/auth/signin')
+            && $request->method() === 'GET'
+            && (int) $request->get('blocked') === 1;
     }
 
     /**

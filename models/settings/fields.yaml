@@ -68,11 +68,17 @@ tabs:
         #
         # Customization
         #
-        mfa_section:
-            label: "Multi Factor Authentication"
+        mfa_section_frontend:
+            label: "Multi Factor Authentication Front-end"
             tab: "Customization"
             span: left
             type: section
+        mfa_section_backend:
+            label: "Multi Factor Authentication Backend-end"
+            tab: "Customization"
+            span: right
+            type: section
+
         mfa_method:
             label: "Method"
             tab: "Customization"
@@ -81,13 +87,38 @@ tabs:
             required: true
             default: prompted
             options:
-                optional: [Optional, User decides to enable MFA on their account.]
-                prompted: [Prompted, MFA setup screen will be prompted after logging in. User can skip this step and setup MFA later.]
-                enforced: [Enforced, MFA is forced site wide. Users will have to setup MFA after logging in.]
+                optional: [Optional, Front-end user decides to enable MFA on their account.]
+                prompted: [Prompted, MFA setup screen will be prompted after logging in. Front-end users can skip this step and setup MFA later.]
+                enforced: [Enforced, MFA is forced site wide. Front-end users will have to setup MFA after logging in.]
+        mfa_method_backend:
+            label: "Method"
+            tab: "Customization"
+            span: right
+            type: radio
+            required: true
+            default: prompted
+            options:
+                optional: [Optional, Back-end user decides to enable MFA on their account.]
+                prompted: [Prompted, MFA setup screen will be prompted after logging in. Back-end users can skip this step and setup MFA later.]
+                enforced: [Enforced, MFA is forced, all Back-end users will have to setup MFA after logging in.]
+
         mfa_maximum_attempts:
             label: "Maximum attempts (0 = unlimited)"
             tab: "Customization"
             span: left
             type: number
             comment: "The user account will be blocked if the number of attempts exceeds this value."
+        mfa_maximum_attempts_backend:
+            label: "Maximum attempts (0 = unlimited)"
+            tab: "Customization"
+            span: right
+            type: number
+            comment: "The user account will be blocked if the number of attempts exceeds this value."
 
+        mfa_lifetime_reauthentication:
+            label: "Lifetime (in seconds) for reauthentication (3600 = 1 hour)"
+            tab: "Customization"
+            span: left
+            type: number
+            default: 3600
+            comment: "To add an extra layer of security, developers can require Users to perform MFA before viewing a page. The lifetime indicates how long the page will be accessible. If the lifetime expires, Users need to perform MFA again to view the page."

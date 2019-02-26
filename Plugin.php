@@ -72,6 +72,7 @@ class Plugin extends PluginBase
             Components\HydroMfa::class => 'hydroCommunityHydroMfa',
             Components\HydroSetup::class => 'hydroCommunityHydroSetup',
             Components\HydroFlash::class => 'hydroCommunityHydroFlash',
+            Components\HydroReauthenticate::class => 'hydroCommunityHydroReauthenticate',
         ];
     }
 
@@ -101,6 +102,20 @@ class Plugin extends PluginBase
                 'order' => 500,
                 'permissions' => ['hydrocommunity.raindrop.access_settings'],
             ],
+        ];
+    }
+
+    /** @noinspection PhpMissingParentCallCommonInspection */
+    /** @noinspection PhpMissingDocCommentInspection */
+    public function registerMarkupTags(): array
+    {
+        return [
+            'functions' => [
+                'isHydroRaindropMfaMethodEnforced' => function () {
+                    $mfaMethod =  Models\Settings::get('mfa_method', Models\Settings::MFA_METHOD_PROMPTED);
+                    return $mfaMethod === Models\Settings::MFA_METHOD_ENFORCED;
+                }
+            ]
         ];
     }
 
