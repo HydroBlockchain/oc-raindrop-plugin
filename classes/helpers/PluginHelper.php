@@ -13,6 +13,7 @@ use HydroCommunity\Raindrop\Models;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Session\Middleware\StartSession;
 use October\Rain\Foundation\Application;
+use October\Rain\Support\Facades\Schema;
 use RainLab\User\Models\User as FrontEndUser;
 
 /**
@@ -75,6 +76,12 @@ final class PluginHelper
      */
     public function extendFrontEndUser(): self
     {
+        $shouldExtend = Schema::hasTable('hydrocommunity_raindrop_users_meta');
+
+        if (!$shouldExtend) {
+            return $this;
+        }
+
         FrontEndUser::extend(function (FrontEndUser $model) {
             $model->hasOne['meta'] = [
                 Models\UserMeta::class,
@@ -104,6 +111,12 @@ final class PluginHelper
      */
     public function extendBackendUser(): self
     {
+        $shouldExtend = Schema::hasTable('hydrocommunity_raindrop_backend_users_meta');
+
+        if (!$shouldExtend) {
+            return $this;
+        }
+
         BackendUser::extend(function (BackendUser $model) {
             $model->hasOne['meta'] = [
                 Models\BackendUserMeta::class,
