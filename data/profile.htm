@@ -1,0 +1,30 @@
+<div class="jumbotron">
+    <div class="container">
+        <h1>{{ this.page.title }}</h1>
+        <p>This is an example User profile page.</p>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            {% component 'account' %}
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>HydroID</label>
+                <div class="form-control">
+                    <td>{{ user.meta.hydro_id|default('-') }}</td>
+                </div>
+            </div>
+            {% if not isHydroRaindropMfaMethodEnforced() %}
+                <div class="form-group">
+                    {% if user.meta.is_mfa_enabled %}
+                        <a href="/hydro-raindrop/disable" onclick="return confirm('Are you sure?')">Disable Multi Factor Authentication</a>
+                    {% else %}
+                        <a href="/hydro-raindrop/enable">Enable Multi Factor Authentication</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

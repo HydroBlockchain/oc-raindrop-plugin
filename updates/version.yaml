@@ -6,3 +6,6 @@
     - Fix installation issue when installing from Marketplace
 1.0.2:
     - Fix extending user models
+1.0.3:
+    - Install default pages to active theme
+    - 103_0001_install_default_pages.php
