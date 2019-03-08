@@ -7,12 +7,12 @@ namespace HydroCommunity\Raindrop;
 use HydroCommunity\Raindrop\Classes\EventListener;
 use HydroCommunity\Raindrop\Classes\Helpers\PluginHelper;
 use HydroCommunity\Raindrop\Components;
+use HydroCommunity\Raindrop\Console\InstallPages;
 use HydroCommunity\Raindrop\Models;
 use HydroCommunity\Raindrop\ServiceProviders\HydroRaindrop;
 use Illuminate\Contracts\Events\Dispatcher;
 use October\Rain\Foundation\Application;
 use System\Classes\PluginBase;
-use System\Classes\PluginManager;
 use System\Classes\SettingsManager;
 
 /**
@@ -149,5 +149,10 @@ class Plugin extends PluginBase
         $eventDispatcher->subscribe(EventListener::class);
 
         $this->app->register(HydroRaindrop::class);
+
+        $this->registerConsoleCommand(
+            'hydrocommunity.raindrop.install-pages',
+            InstallPages::class
+        );
     }
 }
