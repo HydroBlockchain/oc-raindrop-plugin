@@ -12,6 +12,7 @@ use HydroCommunity\Raindrop\ServiceProviders\HydroRaindrop;
 use Illuminate\Contracts\Events\Dispatcher;
 use October\Rain\Foundation\Application;
 use System\Classes\PluginBase;
+use System\Classes\PluginManager;
 use System\Classes\SettingsManager;
 
 /**
@@ -129,14 +130,6 @@ class Plugin extends PluginBase
         if (!$this->helper->isPhpVersionSupported()) {
             return;
         }
-
-        $this->helper->addMiddleware()
-            ->extendBackendUser()
-            ->extendFrontEndUser();
-
-        /** @var Dispatcher $eventDispatcher */
-        $eventDispatcher = resolve(Dispatcher::class);
-        $eventDispatcher->subscribe(EventListener::class);
     }
 
     /** @noinspection ReturnTypeCanBeDeclaredInspection */
@@ -146,6 +139,14 @@ class Plugin extends PluginBase
         if (!$this->helper->isPhpVersionSupported()) {
             return;
         }
+
+        $this->helper->addMiddleware()
+            ->extendBackendUser()
+            ->extendFrontEndUser();
+
+        /** @var Dispatcher $eventDispatcher */
+        $eventDispatcher = resolve(Dispatcher::class);
+        $eventDispatcher->subscribe(EventListener::class);
 
         $this->app->register(HydroRaindrop::class);
     }
