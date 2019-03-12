@@ -130,6 +130,10 @@ class Plugin extends PluginBase
         if (!$this->helper->isPhpVersionSupported()) {
             return;
         }
+
+        $this->helper->addMiddleware()
+            ->extendBackendUser()
+            ->extendFrontEndUser();
     }
 
     /** @noinspection ReturnTypeCanBeDeclaredInspection */
@@ -140,16 +144,14 @@ class Plugin extends PluginBase
             return;
         }
 
-        $this->helper->addMiddleware()
-            ->extendBackendUser()
-            ->extendFrontEndUser();
-
         /** @var Dispatcher $eventDispatcher */
         $eventDispatcher = resolve(Dispatcher::class);
         $eventDispatcher->subscribe(EventListener::class);
 
+        // Register the Hydro Raindrop service provider.
         $this->app->register(HydroRaindrop::class);
 
+        // Register console commands.
         $this->registerConsoleCommand(
             'hydrocommunity.raindrop.install-pages',
             InstallPages::class

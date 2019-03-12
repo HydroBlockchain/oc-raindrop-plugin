@@ -9,3 +9,5 @@
 1.0.3:
     - Install default pages to active theme
     - 103_0001_install_default_pages.php
+1.0.4:
+    - Improve plugin requirement checks

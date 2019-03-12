@@ -1,0 +1,8 @@
+<script>
+    $(document).on('ajaxSuccess', function(event, context) {
+        if (context.handler === 'onSave'
+            && window.location.href.includes('backend/system/settings/update/hydrocommunity/raindrop/settings')) {
+            window.location.reload();
+        }
+    });
+</script>

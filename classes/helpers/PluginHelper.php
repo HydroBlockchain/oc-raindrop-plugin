@@ -9,6 +9,7 @@ use Backend\Controllers\Users as BackendUserController;
 use Backend\Models\User as BackendUser;
 use HydroCommunity\Raindrop\Classes\MfaSession;
 use HydroCommunity\Raindrop\Classes\Middleware;
+use HydroCommunity\Raindrop\Classes\RequirementChecker;
 use HydroCommunity\Raindrop\Models;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Session\Middleware\StartSession;
@@ -52,7 +53,8 @@ final class PluginHelper
     public function addMiddleware(): self
     {
         $shouldAddMiddleware = !$this->application->runningInConsole()
-            && !$this->application->runningUnitTests();
+            && !$this->application->runningUnitTests()
+            && (new RequirementChecker())->passes();
 
         if ($shouldAddMiddleware) {
             /** @var \October\Rain\Foundation\Http\Kernel $kernel */

@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop\Classes\Middleware;
 
+use Backend\Classes\AuthManager as BackendAuthManager;
 use Closure;
 use HydroCommunity\Raindrop\Classes\Exceptions;
-use HydroCommunity\Raindrop\Classes\MfaSession;
 use HydroCommunity\Raindrop\Classes\Helpers\UrlHelper;
+use HydroCommunity\Raindrop\Classes\MfaSession;
 use HydroCommunity\Raindrop\Classes\MfaUser;
 use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\Request;
 use October\Rain\Auth\Models\User;
 use October\Rain\Flash\FlashBag;
 use RainLab\User\Classes\AuthManager as FrontEndAuthManager;
-use Backend\Classes\AuthManager as BackendAuthManager;
 
 /**
  * Class MfaSetup
