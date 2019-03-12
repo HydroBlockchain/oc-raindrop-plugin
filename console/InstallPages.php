@@ -58,6 +58,7 @@ class InstallPages extends Command
             'fileName' => 'hydro/mfa',
             'url' => '/hydro-raindrop/mfa',
             'title' => 'Hydro Raindrop MFA',
+            'layout' => 'default',
             'description' => 'Hydro Raindrop MFA page.',
             'is_hidden' => 0,
             'settings' => [
@@ -73,6 +74,7 @@ class InstallPages extends Command
             'fileName' => 'hydro/setup',
             'url' => '/hydro-raindrop/setup',
             'title' => 'Hydro Raindrop Setup',
+            'layout' => 'default',
             'description' => 'Hydro Raindrop Setup page.',
             'is_hidden' => 0,
             'settings' => [
@@ -88,6 +90,7 @@ class InstallPages extends Command
             'fileName' => 'hydro/profile',
             'url' => '/hydro-raindrop/profile',
             'title' => 'Hydro Raindrop Setup',
+            'layout' => 'default',
             'description' => 'Hydro Raindrop Profile page.',
             'is_hidden' => 0,
             'settings' => [
