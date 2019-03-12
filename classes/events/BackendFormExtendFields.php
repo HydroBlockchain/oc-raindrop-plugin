@@ -31,7 +31,7 @@ class BackendFormExtendFields
             $form->addTabFields([
                 'meta[is_blocked]@update' => [
                     'tab' => 'rainlab.user::lang.user.account',
-                    'comment' => 'Blockedw users are not able to sign in.',
+                    'comment' => 'Blocked users are not able to sign in.',
                     'type' => 'checkbox',
                     'label' => 'Blocked',
                 ],
