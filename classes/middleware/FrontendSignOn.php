@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace HydroCommunity\Raindrop\Classes\Middleware;
 
 use Closure;
-use HydroCommunity\Raindrop\Classes\MfaUser;
 use HydroCommunity\Raindrop\Classes\Helpers\UrlHelper;
+use HydroCommunity\Raindrop\Classes\MfaUser;
 use Illuminate\Http\Request;
 use October\Rain\Auth\AuthException;
 use RainLab\User\Classes\AuthManager;

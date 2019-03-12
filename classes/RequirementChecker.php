@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop\Classes;
 
+use Adrenth\Raindrop\ApiSettings;
 use Cms\Classes\Page;
 use Cms\Classes\Theme;
+use HydroCommunity\Raindrop\Models\Settings;
 use Illuminate\Http\Request;
 
 /**
@@ -22,6 +24,7 @@ class RequirementChecker
     const /** @noinspection AccessModifierPresentedInspection */ REQUIREMENT_CURL = 'curl';
     const /** @noinspection AccessModifierPresentedInspection */ REQUIREMENT_MFA_PAGE = 'mfa_page';
     const /** @noinspection AccessModifierPresentedInspection */ REQUIREMENT_MFA_SETUP_PAGE = 'mfa_setup_page';
+    const /** @noinspection AccessModifierPresentedInspection */ REQUIREMENT_API_SETTINGS = 'mfa_api_settings';
 
     /**
      * Run all checks.
@@ -122,6 +125,20 @@ class RequirementChecker
                     return false;
                 },
             ],
+            self::REQUIREMENT_API_SETTINGS => [
+                'label' => 'API Settings',
+                'requirement' => 'API settings must be provided for this plugin to work.',
+                'test' => function () {
+                    /** @var ApiSettings $apiSettings */
+                    $apiSettings = resolve(ApiSettings::class);
+                    $applicationId = (string) Settings::get('application_id', '');
+
+                    return $applicationId !== ''
+                        && strlen($applicationId) === 36
+                        && $apiSettings->getClientId() !== ''
+                        && $apiSettings->getClientSecret() !== '';
+                }
+            ]
         ];
     }
 

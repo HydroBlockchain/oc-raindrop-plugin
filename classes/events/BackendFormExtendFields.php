@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop\Classes\Events;
 
+use Backend\Classes\FormTabs;
 use Backend\Controllers\Users as BackendUserController;
 use RainLab\User\Controllers\Users as FrontendUserController;
 use Backend\Widgets\Form;
@@ -30,7 +31,7 @@ class BackendFormExtendFields
             $form->addTabFields([
                 'meta[is_blocked]@update' => [
                     'tab' => 'rainlab.user::lang.user.account',
-                    'comment' => 'Blocked users are not able to sign in.',
+                    'comment' => 'Blockedw users are not able to sign in.',
                     'type' => 'checkbox',
                     'label' => 'Blocked',
                 ],
@@ -107,11 +108,21 @@ class BackendFormExtendFields
         if ($form->model instanceof Models\Settings) {
             $requirementChecker = new RequirementChecker();
 
-            if (!$requirementChecker->passes()) {
-                $form->removeTab('General');
-                $form->removeTab('API Settings');
-                $form->removeTab('Customization');
+            if (!$requirementChecker->passesRequirement(RequirementChecker::REQUIREMENT_API_SETTINGS)) {
+                /** @var FormTabs $formTabs */
+                $formTabs = $form->getTabs()->primary;
+                $formTabs->icons = [
+                    'API Settings' => 'text-danger icon-warning',
+                ];
             }
+
+            $form->addTabFields([
+                '_reload' => [
+                    'tab' => 'API Settings',
+                    'type' => 'partial',
+                    'path' => '$/hydrocommunity/raindrop/views/_backend_settings_reload.htm'
+                ]
+            ]);
         }
     }
 }
