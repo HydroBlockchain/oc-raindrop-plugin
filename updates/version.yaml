@@ -11,3 +11,6 @@
     - 103_0001_install_default_pages.php
 1.0.4:
     - Improve plugin requirement checks
+1.0.5:
+    - Install demo theme with implementation example
+    - 105_0001_install_demo_theme.php
