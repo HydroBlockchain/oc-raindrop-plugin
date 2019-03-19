@@ -7,6 +7,7 @@ namespace HydroCommunity\Raindrop;
 use HydroCommunity\Raindrop\Classes\EventListener;
 use HydroCommunity\Raindrop\Classes\Helpers\PluginHelper;
 use HydroCommunity\Raindrop\Components;
+use HydroCommunity\Raindrop\Console\InstallDemoTheme;
 use HydroCommunity\Raindrop\Console\InstallPages;
 use HydroCommunity\Raindrop\Models;
 use HydroCommunity\Raindrop\ServiceProviders\HydroRaindrop;
@@ -155,6 +156,11 @@ class Plugin extends PluginBase
         $this->registerConsoleCommand(
             'hydrocommunity.raindrop.install-pages',
             InstallPages::class
+        );
+
+        $this->registerConsoleCommand(
+            'hydrocommunity.raindrop.install-demo-theme',
+            InstallDemoTheme::class
         );
     }
 }
