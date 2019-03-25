@@ -7,6 +7,7 @@ namespace HydroCommunity\Raindrop\Console;
 use Cms\Classes\ThemeManager;
 use Illuminate\Console\Command;
 use System\Classes\UpdateManager;
+use Throwable;
 
 /**
  * Class InstallDemoTheme
@@ -33,23 +34,27 @@ class InstallDemoTheme extends Command
      */
     public function handle()
     {
-        @set_time_limit(3600);
+        try {
+            @set_time_limit(3600);
 
-        $theme = 'HydroCommunity.hydro_raindrop_demo';
+            $theme = 'HydroCommunity.hydro_raindrop_demo';
 
-        $installedThemes = ThemeManager::instance()->getInstalled();
+            $installedThemes = ThemeManager::instance()->getInstalled();
 
-        if (isset($installedThemes[$theme])) {
-            $this->output->warning('Theme already installed.');
-            exit(1);
+            if (isset($installedThemes[$theme])) {
+                $this->output->warning('Theme already installed.');
+                return;
+            }
+
+            $manager = UpdateManager::instance();
+
+            $details = $manager->requestThemeDetails($theme);
+
+            $manager->downloadTheme($theme, $details['hash']);
+            $manager->extractTheme($theme, $details['hash']);
+            $manager->update();
+        } catch (Throwable $e) {
+            $this->output->error($e->getMessage());
         }
-
-        $manager = UpdateManager::instance();
-
-        $details = $manager->requestThemeDetails($theme);
-
-        $manager->downloadTheme($theme, $details['hash']);
-        $manager->extractTheme($theme, $details['hash']);
-        $manager->update();
     }
 }
