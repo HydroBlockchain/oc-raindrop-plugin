@@ -136,7 +136,9 @@ class RequirementChecker
                     return $applicationId !== ''
                         && strlen($applicationId) === 36
                         && $apiSettings->getClientId() !== ''
-                        && $apiSettings->getClientSecret() !== '';
+                        && strlen($apiSettings->getClientId()) === 26
+                        && $apiSettings->getClientSecret() !== ''
+                        && strlen($apiSettings->getClientSecret()) === 26;
                 }
             ]
         ];
