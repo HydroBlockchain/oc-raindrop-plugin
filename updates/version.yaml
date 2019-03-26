@@ -16,3 +16,5 @@
     - 105_0001_install_demo_theme.php
 1.0.6:
     - Fix a critical installation issue when Hydro Demo theme is already installed
+1.0.7:
+    - Improve API settings validation
