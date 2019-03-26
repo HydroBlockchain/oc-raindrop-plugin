@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace HydroCommunity\Raindrop\Classes;
 
-use Adrenth\Raindrop\ApiSettings;
+use Adrenth\Raindrop;
 use Cms\Classes\Page;
 use Cms\Classes\Theme;
 use HydroCommunity\Raindrop\Models\Settings;
+use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Contracts\Cache\Store;
 use Illuminate\Http\Request;
 
 /**
@@ -129,16 +131,54 @@ class RequirementChecker
                 'label' => 'API Settings',
                 'requirement' => 'API settings must be provided for this plugin to work.',
                 'test' => function () {
-                    /** @var ApiSettings $apiSettings */
-                    $apiSettings = resolve(ApiSettings::class);
+                    /** @var Raindrop\ApiSettings $apiSettings */
+                    $apiSettings = resolve(Raindrop\ApiSettings::class);
                     $applicationId = (string) Settings::get('application_id', '');
 
-                    return $applicationId !== ''
+                    $possiblyCorrect = $applicationId !== ''
                         && strlen($applicationId) === 36
                         && $apiSettings->getClientId() !== ''
                         && strlen($apiSettings->getClientId()) === 26
                         && $apiSettings->getClientSecret() !== ''
                         && strlen($apiSettings->getClientSecret()) === 26;
+
+                    if (!$possiblyCorrect) {
+                        return false;
+                    }
+
+                    $cacheKey = 'hydro-community-raindrop_' . sha1(implode('-', [
+                        $apiSettings->getClientId(),
+                        $apiSettings->getClientSecret(),
+                        $apiSettings->getEnvironment()->getApiUrl()
+                    ]));
+
+                    /** @var Repository $cache */
+                    $cache = resolve(Repository::class);
+
+                    if ($cache->has($cacheKey)) {
+                        return $cache->get($cacheKey);
+                    }
+
+                    /** @var Raindrop\Client $client */
+                    $client = resolve(Raindrop\Client::class);
+
+                    /** @var Raindrop\TokenStorage\TokenStorage $tokenStorage */
+                    $tokenStorage = resolve(Raindrop\TokenStorage\TokenStorage::class);
+
+                    /*
+                     * Try to fetch the Access Token in order to verify the API settings.
+                     */
+                    try {
+                        $tokenStorage->unsetAccessToken();
+
+                        $client->getAccessToken();
+                        $cache->forever($cacheKey, true);
+                    } catch (Raindrop\Exception\RefreshTokenFailed $e) {
+                        $cache->forever($cacheKey, false);
+                        return false;
+                    }
+
+                    return true;
                 }
             ]
         ];
